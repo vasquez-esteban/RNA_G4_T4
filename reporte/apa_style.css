@@ -1,0 +1,25 @@
+body {
+  font-family: "Times New Roman", serif !important;
+  line-height: 1.5;
+  margin: 0 auto;
+  padding: 1in;
+  font-size: 12pt;
+}
+
+/* Encabezados con línea inferior */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Times New Roman", serif !important;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 6px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+/* Personalización del título de la tabla (caption) */
+caption {
+  font-size: 16px;           /* Tamaño de la fuente */
+  font-weight: bold;         /* Hacer el texto en negrita */
+  text-align: center;        /* Centrado del título */
+  color: #000000;            /* Color de texto negro */
+  margin-bottom: 10px;       /* Espacio debajo del título */
+}
