@@ -12,9 +12,7 @@ import streamlit as st
 from config.settings import GENRES, LENGTH_OPTIONS, TONES
 from core.input_validation import validar_entrada
 from core.prompt_engineering import construir_prompt
-from core.story_generator import (
-    generar_historia_mock as generar_historia,  # Reemplazar luego
-)
+from core.story_generator import generar_historia
 
 st.set_page_config(page_title="Agente de Historias", layout="centered")
 st.title("📖 Agente Creativo de Historias")

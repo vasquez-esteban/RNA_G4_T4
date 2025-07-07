@@ -3,10 +3,10 @@
 import streamlit as st
 
 # Clave API
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
 
 # Parámetros de generación
-DEFAULT_MODEL = "gpt-4"
+DEFAULT_MODEL = "deepseek/deepseek-chat-v3-0324:free"
 TEMPERATURE = 0.8
 MAX_TOKENS = 1500
 
