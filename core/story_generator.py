@@ -17,8 +17,8 @@ def generar_historia(prompt: str) -> str:
         temperature=TEMPERATURE,
         max_tokens=MAX_TOKENS,
         extra_headers={
-            "HTTP-Referer": "http://localhost:8501",
-            "X-Title": "AgenteHistoriasLocal",
+            "HTTP-Referer": "http://https://rna-g4-generador-historias.streamlit.app/",
+            "X-Title": "AgenteHistorias",
         },
     )
     return response.choices[0].message.content
