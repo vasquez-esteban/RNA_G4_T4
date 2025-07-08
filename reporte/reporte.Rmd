@@ -12,7 +12,7 @@ output:
 ---
 
 ::: {style="text-align: center; color: black; margin-top: 60px;"}
-<h1>TRABAJO 4: SISTEMAS DE PREDICCIÓN, CLASIFICACIÓN Y RECOMENDACIÓN</h1>
+<h1>TRABAJO 4: AGENTE CREATIVO DE HISTORIAS CON LLMs</h1>
 <h2>REDES NEURONALES Y ALGORITMOS BIOINSPIRADOS</h2>
 <br><br><br>
 <p><strong>Presentado por:</strong></p>
@@ -26,23 +26,9 @@ output:
 :::
 
 ```{r setup, include=FALSE}
-# ----------------------------------------
-# Setup mínimo para tablas con kableExtra
-# ----------------------------------------
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(
-  knitr,       # Generación de tablas base
-  kableExtra,  # Estilización de tablas
-  magrittr     # Pipe %>%
-)
-
-# Configuración global de chunks
-knitr::opts_chunk$set(
-  echo = FALSE,
-  warning = FALSE,
-  message = FALSE
-)
-# ----------------------------------------
+pacman::p_load(knitr, kableExtra, magrittr)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
 <div style="page-break-after: always;"></div>
@@ -51,470 +37,287 @@ knitr::opts_chunk$set(
 
 - [Resumen Ejecutivo](#resumen-ejecutivo)
 - [1. Introducción](#introduccion)
-  - [1.1 Contexto y Motivación](#contexto)
-  - [1.2 Planteamiento del Problema](#problema)
-  - [1.3 Objetivos](#objetivos)
-  - [1.4 Alcances y Limitaciones](#alcances)
-- [2. Metodología](#metodologia)
-  - [2.1 Enfoque General](#enfoque)
-  - [2.2 Fases del Proyecto](#fases)
-  - [2.3 Herramientas y Tecnologías](#herramientas)
-- [3. Módulo 1 - Predicción de Demanda de Transporte](#modulo1)
-- [4. Módulo 2 - Clasificación de Conducción Distractiva](#modulo2)
-- [5. Módulo 3 - Recomendación de Destinos de Viaje](#modulo3)
-- [6. Herramienta Web Integrada](#herramienta-web)
-- [7. Resultados Generales y Discusión](#resultados)
-- [8. Conclusiones y Recomendaciones](#conclusiones)
-- [9. Aspectos Éticos y Creatividad](#etica)
-- [10. Bibliografía](#bibliografia)
-- [11. Anexos](#anexos)
+- [2. Arquitectura del Sistema](#arquitectura)
+- [3. Implementación Técnica](#implementacion)
+- [4. Desafíos y Soluciones](#desafios)
+- [5. Aspectos Éticos y Consideraciones](#etica)
+- [6. Resultados y Evaluación](#resultados)
+- [7. Reflexiones y Lecciones Aprendidas](#reflexiones)
+- [8. Conclusiones y Trabajo Futuro](#conclusiones)
+- [9. Bibliografía](#bibliografia)
+- [10. Anexos](#anexos)
 
 ---
 
 ## Resumen Ejecutivo {#resumen-ejecutivo}
 
-# 1 Introducción {#introduccion}
+Este proyecto desarrolla un **Agente Creativo de Historias** basado en LLMs que genera narrativas personalizadas utilizando el modelo DeepSeek V3 a través de OpenRouter. El sistema permite a usuarios especificar personajes, escenarios, géneros, tonos y elementos de trama para producir historias coherentes de 300-800 palabras.
 
-## 1.1 Contexto y Motivación {#contexto}
+La arquitectura modular incluye validación de entradas, ingeniería de prompts, generación con LLM e interfaz web Streamlit. El proyecto aborda el equilibrio entre creatividad y control, manejo de APIs externas, y consideraciones éticas sobre sesgos en contenido generado automáticamente.
 
-El sector del transporte y el turismo enfrenta retos complejos que requieren soluciones avanzadas. Por un lado, las empresas de transporte deben anticipar la **demanda** de viajes y garantizar la **seguridad vial**, mientras que, por otro, en la industria turística es crucial ofrecer experiencias personalizadas a los usuarios mediante **sistemas de recomendación** inteligentes. En ambos ámbitos, las *redes neuronales profundas* se han posicionado como herramientas poderosas para abordar estos problemas complejos, gracias a su capacidad de aprender patrones intrincados a partir de grandes volúmenes de datos heterogéneos (por ejemplo, imágenes, series de tiempo y preferencias de usuarios) [Xiao et al., 2025].
+Los resultados demuestran capacidad para generar historias narrativamente sólidas que respetan especificaciones del usuario, con una interfaz accesible que facilita exploración creativa e iteración sobre ideas narrativas.
 
-Un problema crítico en transporte es la **conducción distraída**, la cual se reconoce como una de las principales causas de accidentes de tráfico a nivel mundial [Sorum & Sorum, 2025]. Solo en 2022, se reportaron más de 3.300 muertes en Estados Unidos asociadas a choques con conductores distraídos [National Conference of State Legislatures, 2025], evidenciando la urgencia de mejorar la seguridad vial. Tecnologías de visión por computador basadas en *deep learning* pueden ayudar a monitorear en tiempo real el comportamiento del conductor para detectar distracciones y prevenir accidentes. Simultáneamente, en el ámbito del turismo, los viajeros se enfrentan a una sobreabundancia de opciones. Un **sistema de recomendación de destinos turísticos** personalizado puede mejorar enormemente la experiencia al sugerir destinos acordes a las preferencias individuales de cada usuario. Las técnicas de *deep learning* han demostrado mejorar la precisión de estas recomendaciones al procesar información compleja de usuarios y destinos, superando las limitaciones de métodos tradicionales [Xiao et al., 2025].
+---
 
-Además, la planificación operativa del transporte (por ejemplo, predecir cuántos pasajeros usarán cierta ruta en el futuro cercano) es otro desafío que puede abordarse con modelos de aprendizaje profundo. Prever la demanda de transporte con antelación permite optimizar recursos y rutas, contribuyendo a un servicio más eficiente.
+# 1. Introducción {#introduccion}
 
-La motivación central de nuestro trabajo es integrar soluciones basadas en redes neuronales profundas para mejorar **tres aspectos clave** en una empresa de transporte turístico: la **predicción de demanda**, la **detección de conducción distraída** y la **personalización de recomendaciones de viaje**. La disponibilidad de potentes recursos de cómputo en la nube –como las GPU ofrecidas en entornos Kaggle– ha democratizado el desarrollo de estos modelos, permitiéndonos entrenar redes profundas desde cero sin necesidad de infraestructura local costosa.
+## 1.1 Contexto y Motivación
 
-## 1.2 Planteamiento del Problema {#problema}
+Los LLMs han revolucionado la generación de texto creativo, pero requieren herramientas que combinen creatividad controlada con usabilidad práctica. Este proyecto surge de la necesidad de crear un sistema que ofrezca control granular sobre elementos narrativos mientras mantiene una interfaz accesible para usuarios no técnicos.
 
-El presente proyecto se enfoca en resolver los siguientes problemas interrelacionados mediante el uso de técnicas de *deep learning*:
+La escritura creativa tradicional requiere dominio técnico del lenguaje y capacidad de estructurar narrativas complejas. Los LLMs modernos han demostrado capacidades notables, pero su naturaleza probabilística introduce desafíos únicos para crear herramientas que combinen creatividad controlada con usabilidad práctica.
 
-- ¿Cómo predecir la demanda de transporte en rutas específicas en los próximos 30 días para garantizar una planificación óptima de vehículos y personal?
-- ¿Cómo clasificar imágenes de conductores para identificar comportamientos distractores que pongan en riesgo la seguridad de los pasajeros?
-- ¿Cómo sugerir destinos turísticos personalizados a los clientes, basándose en su historial de viajes y preferencias?
+## 1.2 Planteamiento del Problema
 
-Estos desafíos, de naturaleza compleja y multidimensional, requieren modelos de aprendizaje capaces de capturar relaciones no lineales en datos temporales, visuales y contextuales, tarea en la que las redes neuronales profundas han demostrado un desempeño sobresaliente.
+Los principales desafíos incluyen:
 
-## 1.3 Objetivos {#objetivos}
+- **Control vs. Creatividad:** Equilibrar especificaciones del usuario con originalidad del output
+- **Prompts Creativos:** Diseñar prompts que guíen efectivamente sin limitar creatividad  
+- **Validación Compleja:** Validar elementos narrativos subjetivos sin ser restrictivo
+- **Gestión de Recursos:** Optimizar uso de APIs manteniendo alta disponibilidad
+- **Consideraciones Éticas:** Minimizar sesgos culturales y de género en historias generadas
 
-A partir del diagnóstico anterior, se definen los siguientes objetivos específicos:
+## 1.3 Objetivos
 
-- **Predicción de Demanda:** Construir un modelo predictivo para anticipar la cantidad de pasajeros por ruta, empleando datos históricos y técnicas de modelado de series temporales.
-- **Clasificación de Conductores:** Implementar una red neuronal convolucional (CNN) diseñada manualmente para detectar automáticamente conductas distractoras en imágenes de conductores.
-- **Recomendación de Destinos:** Desarrollar un sistema de recomendación personalizado que sugiere destinos de viaje usando el historial de viajes y preferencias de cada usuario.
+**Objetivo Principal:** Desarrollar un agente inteligente para generar historias narrativamente coherentes a partir de especificaciones estructuradas.
 
-Adicionalmente, se propone integrar los tres módulos anteriores en una herramienta web funcional y amigable, que permita visualizar predicciones, cargar imágenes y recibir recomendaciones en tiempo real.
+**Objetivos Técnicos:**
+- Sistema robusto de validación de entradas
+- Estrategia optimizada de ingeniería de prompts  
+- Arquitectura modular escalable
+- Integración eficiente con APIs de LLMs
 
-## 1.4 Alcances y Limitaciones {#alcances}
+**Objetivos de Usabilidad:**
+- Interfaz web intuitiva para usuarios no técnicos
+- Retroalimentación inmediata sobre validez de entradas
+- Iteración fluida sobre ideas narrativas
 
-Este proyecto contempla la implementación de modelos funcionales para cada uno de los tres módulos mencionados, entrenados con datos públicos recopilados en contextos reales de India (turismo) y Bangladesh (conducción). Sin embargo, existen las siguientes limitaciones:
+## 1.4 Alcances y Limitaciones
 
-- **Generalización limitada:** Los modelos fueron entrenados con datasets específicos (por ejemplo, imágenes capturadas en Dhaka), lo cual restringe su capacidad de generalizar a otras regiones o condiciones.
-- **Recursos computacionales:** Si bien se usaron GPUs gratuitas de Kaggle, la exploración completa del espacio de hiperparámetros fue acotada por tiempo y capacidad.
-- **Interpretabilidad:** Aunque se optó por diseñar una CNN desde cero para mayor comprensión, las decisiones del modelo no siempre son fácilmente explicables a usuarios finales.
-- **Cobertura geográfica y de usuarios:** El sistema de recomendación está limitado a los destinos del dataset de India, y la predicción de demanda se basa en datos históricos simulados o restringidos.
+**Alcances:** Generación de historias cortas (300-800 palabras) en múltiples géneros, interfaz web interactiva, funcionalidades de descarga, arquitectura modular escalable.
 
-A pesar de lo anterior, los modelos desarrollados representan un punto de partida robusto y funcional para construir sistemas de transporte inteligente aplicables en la práctica.
+**Limitaciones:** Dependencia de APIs externas, optimización para narrativas cortas, evaluación subjetiva de calidad, sesgos del modelo base, costos operacionales.
 
+---
 
+# 2. Arquitectura del Sistema {#arquitectura}
 
+## 2.1 Diseño Modular
 
+La arquitectura sigue un paradigma modular que separa responsabilidades funcionales: validación de entradas, construcción de prompts, generación mediante LLM e interfaz de usuario. Esta separación facilita mantenimiento, testing y escalabilidad.
 
-# 2 Metodología {#metodologia}
+La estructura del proyecto refleja esta modularidad:
 
-## 2.1 Enfoque General {#enfoque}
+- **streamlit_app/**: Interfaz de usuario y orquestación
 
-Para abordar los retos definidos, adoptamos un enfoque estructurado basado en los principios del **Design Thinking**, una metodología centrada en comprender profundamente el problema, idear soluciones efectivas y evaluar su impacto desde la perspectiva de los usuarios. Aunque originalmente se asocia al diseño de productos, su estructura nos permitió organizar de forma eficiente el trabajo colaborativo en este proyecto:
+- **core/**: Lógica de negocio principal (validación, prompts, generación)
 
-- **Empatizar:** Analizamos los desafíos de la empresa de transporte, reconociendo la importancia de anticipar la demanda, detectar comportamientos riesgosos al volante y personalizar la experiencia turística.
-- **Definir:** Delimitamos tres problemas clave: predicción de demanda, clasificación de conducción distractiva y recomendación de destinos.
-- **Idear:** Diseñamos una solución compuesta por tres modelos independientes que se integrarían en una sola herramienta web.
-- **Prototipar:** Implementamos y entrenamos modelos funcionales con datos reales, aprovechando recursos computacionales gratuitos como las GPUs de Kaggle.
-- **Evaluar:** Analizamos métricas de desempeño para cada módulo y reflexionamos sobre su aplicabilidad práctica en entornos reales.
+- **config/**: Configuración centralizada del sistema
 
-Este enfoque nos permitió mantener una visión clara del proyecto, fomentar la colaboración continua entre integrantes y construir soluciones con impacto potencial para la industria del transporte y el turismo.
+- **examples/**: Ejemplos y casos de prueba
 
-## 2.2 Fases del Proyecto {#fases}
+## 2.2 Componentes Principales
 
-El desarrollo del sistema inteligente se estructuró en varias fases iterativas, que nos permitieron avanzar progresivamente desde la planificación hasta la implementación técnica:
+### Módulo de Configuración
+Centraliza parámetros del modelo LLM (DeepSeek V3, temperatura 0.8, límites de tokens 1500), opciones de usuario (géneros, tonos, longitudes) y especificaciones de formato.
 
-1. **Inicialización del entorno y recursos:**
-   - Creamos dos repositorios en GitHub: uno para el desarrollo de la app web y otro para los notebooks en Kaggle.
-   - Configuramos el pipeline de despliegue continuo para la app en **Hugging Face Spaces** con `Gradio`.
-   - Establecimos una plantilla base en **RPubs** para redactar el informe técnico de manera colaborativa.
-   - Definimos el stack de herramientas: Python, Gradio, TensorFlow/Keras, Kaggle Notebooks y almacenamiento externo en Google Drive para modelos de gran tamaño.
+### Módulo de Validación  
+Implementa validación multicapa: presencia de campos, contenido significativo, formato válido, opciones predefinidas, y estructura narrativa completa.
 
-2. **Construcción del modelo de clasificación de imágenes:**
-   - Iniciamos el desarrollo del módulo de visión artificial por ser el más factible en términos de datos disponibles y claridad del objetivo.
-   - En lugar de emplear arquitecturas preexistentes como AlexNet, optamos por construir manualmente una **CNN bottom-up**, lo cual nos permitió comprender mejor el impacto de cada capa y adaptar el modelo a nuestros recursos computacionales.
+### Módulo de Ingeniería de Prompts
+Construye prompts optimizados para creatividad: estructura narrativa clara, contextualización como "escritor profesional", integración de elementos narrativos, y control de extensión.
 
-3. **Paralelización de módulos restantes:**
-   - Una vez consolidado el modelo de clasificación, distribuimos el trabajo para abordar los otros módulos:
-     - **José** y **Marcos** comenzaron a explorar el dataset de turismo para construir un sistema de recomendación basado en filtrado colaborativo con embeddings.
-     - **Tomás** se encargó de explorar los datos para modelar la demanda de transporte mediante series temporales.
-     - **Esteban** lideró la organización de los repositorios, el despliegue técnico y la redacción del informe, garantizando una documentación clara y continua.
+### Módulo de Generación
+Maneja integración con OpenRouter y DeepSeek V3: configuración de cliente, parámetros optimizados, gestión de errores, y headers para analytics.
 
-4. **Colaboración y revisión continua:**
-   - Establecimos **reuniones semanales cada domingo**, en las que discutíamos avances, compartíamos aprendizajes y coordinábamos las siguientes tareas.
-   - Utilizamos funciones colaborativas de GitHub como issues, branches y pull requests para mantener un control claro del desarrollo.
+## 2.3 Flujo de Procesamiento
 
-## 2.3 Herramientas y Tecnologías {#herramientas}
+El sistema sigue una secuencia lógica:
 
-Durante el proyecto, empleamos un conjunto variado de herramientas que nos permitió construir, probar y desplegar nuestras soluciones de manera eficiente:
+1. **Captura de Entradas:** Formulario estructurado en Streamlit
 
-Las herramientas utilizadas en el proyecto fueron:
+2. **Validación:** Verificación exhaustiva antes de procesamiento
 
-- **Kaggle**: Entrenamiento de modelos en notebooks con GPU gratuita.
-- **RPubs**: Redacción y publicación del informe técnico.
-- **Hugging Face Spaces**: Hosting de la app web con despliegue automatizado.
-- **Gradio**: Creación de la interfaz gráfica para uso de modelos desde el navegador.
-- **GitHub**: Control de versiones, desarrollo colaborativo y documentación.
-- **Google Drive**: Almacenamiento de modelos pesados de forma externa.
+3. **Construcción del Prompt:** Transformación de entradas en prompt estructurado
 
-El uso articulado de estas tecnologías nos permitió mantener un flujo de trabajo ordenado, reproducible y alineado con las necesidades técnicas y comunicativas del proyecto.
+4. **Generación:** Envío a DeepSeek V3 con parámetros optimizados  
 
+5. **Presentación:** Visualización inmediata con funcionalidad de descarga
 
-# 3. Módulo 1 - Predicción de Demanda de Transporte {#modulo1}
 
+---
 
+# 3. Implementación Técnica {#implementacion}
 
-# 4 Módulo 2: Clasificación de Conducción Distractiva {#modulo2}
+## 3.1 Validación de Entradas
 
-> Para el diseño de nuestra arquitectura base, nos inspiramos en el trabajo de Ghaffar (2023), quien desarrolla un sistema de clasificación de imágenes para conductores distraídos usando redes convolucionales. A partir de este estudio, adaptamos una arquitectura más pequeña y eficiente, ajustada a nuestro conjunto de datos de 7.267 imágenes, con el fin de mantener una buena capacidad de generalización sin sobreentrenamiento.
+El sistema implementa validación jerárquica que evalúa presencia de campos requeridos, contenido significativo usando expresiones regulares para detectar entradas sin valor semántico, opciones predefinidas válidas, y estructura narrativa completa con conflicto, obstáculos y resolución.
 
-El modelo propuesto por Ghaffar (2023) incluía siete capas convolucionales y múltiples capas densas para una clasificación de 10 clases con más de 22.000 imágenes. En nuestro caso, adaptamos esta arquitectura reduciendo significativamente la cantidad de capas y parámetros, ajustando la red a un conjunto más pequeño (7.267 imágenes) y a un dominio específico de cinco clases, logrando así un modelo más eficiente y menos propenso al sobreajuste.
+## 3.2 Ingeniería de Prompts
 
-## 4.1 Descripción del Dataset {#41-descripción-del-dataset}
+La estrategia de prompt engineering incluye contextualización profesional estableciendo al modelo como "escritor profesional", estructura narrativa explícita (Introducción → Desarrollo → Resolución), integración de elementos narrativos con separadores visuales emoji, y especificación clara de límites de longitud y estilo.
 
-El conjunto de datos utilizado proviene de escenas reales captadas dentro de vehículos en movimiento en Dhaka, Bangladesh. Incluye imágenes etiquetadas manualmente con cinco categorías de comportamiento del conductor:
+## 3.3 Generación con LLMs
 
-- `safe_driving`: conducción atenta y segura
-- `turning`: movimiento de giro o cambio de dirección
-- `texting_phone`: uso activo del teléfono para escribir
-- `talking_phone`: uso del teléfono en llamada
-- `other_activities`: cualquier otra actividad distractora, como comer, dormir o interactuar con otros pasajeros
+La integración con OpenRouter utiliza la biblioteca OpenAI con URL base personalizada, parámetros optimizados (temperatura 0.8 para equilibrar creatividad con coherencia, max_tokens 1500), y headers personalizados para identificación del proyecto.
 
-El total de imágenes asciende a **7.267**, con una distribución de clases razonablemente balanceada. Esta distribución se visualiza en la Figura 10.
+## 3.4 Interfaz de Usuario
 
-```{r fig1-distrib-clases, out.width="60%", fig.align='center', fig.cap='Figura 10. Distribución de imágenes por clase en el dataset'}
-knitr::include_graphics("imgs/drivers_classif/distrib_clase.png")
-```
+Streamlit proporciona configuración centrada, gestión de estado de sesión para preservar entradas y historias, formulario estructurado con componentes apropiados (text areas, selectboxes, radio buttons), y flujo claro de procesamiento con feedback visual.
 
-## 4.2 Preprocesamiento de Imágenes {#42-preprocesamiento-de-imágenes}
+---
 
-Las imágenes se redimensionaron a 224x224 píxeles y fueron procesadas utilizando `ImageDataGenerator`, con aumentos que incluyeron rotaciones, traslaciones, zoom, modificaciones de brillo y espejado horizontal. Esto nos permitió incrementar la diversidad del conjunto de entrenamiento y mejorar la generalización del modelo.
+# 4. Desafíos y Soluciones {#desafios}
 
-Adicionalmente, empleamos `class_weights` calculados con `sklearn.utils.class_weight.compute_class_weight()` para penalizar la pérdida en función de la frecuencia de cada clase.
+## 4.1 Desafíos Técnicos
 
-También realizamos una exploración visual de las imágenes y ejemplos aleatorios, como se muestra en la Figura 11.
+**Integración con APIs Externas:** Solucionado con configuración de timeouts apropiados, headers personalizados, y estructura modular para facilitar cambio de proveedores.
 
-```{r fig2-ejemplos-batch, out.width="60%", fig.align='center', fig.cap='Figura 11. Ejemplos aleatorios de imágenes del dataset'}
-knitr::include_graphics("imgs/drivers_classif/example_batch.png")
-```
+**Optimización de Parámetros:** Temperatura 0.8 y max_tokens 1500 determinados empíricamente para equilibrar creatividad con coherencia y control de costos.
 
-## 4.3 Arquitectura del Modelo {#43-arquitectura-del-modelo}
+**Gestión de Estado:** Utilización del session state de Streamlit para preservar contexto entre interacciones.
 
-Inspirados en arquitecturas más complejas como AlexNet, diseñamos una red convolucional más ligera y eficiente con tres bloques convolucionales, regularización L2, `BatchNormalization` y `Dropout` entre capas. El modelo fue entrenado con:
+## 4.2 Prompt Engineering para Creatividad
 
-- Activación final: `softmax`
-- Función de pérdida: `sparse_categorical_crossentropy`
-- Callbacks: `EarlyStopping` y `ModelCheckpoint`
-- División: 80% entrenamiento / 20% validación
+**Estructuración Efectiva:** Separación clara de elementos narrativos, estructura flexible pero explícita, y contextualización del modelo como "escritor profesional".
 
-Este enfoque bottom-up nos permitió controlar el tamaño y complejidad del modelo en relación con el tamaño del dataset disponible.
+**Determinismo vs. Creatividad:** Enfoque de creatividad guiada que proporciona estructura suficiente manteniendo flexibilidad para expresión creativa.
 
-## 4.4 Evaluación y Resultados {#44-evaluación-y-resultados}
+**Diferencias Creativo vs. Factual:** Las tareas creativas requieren contexto emocional y narrativo usando role-playing, mientras las factuales necesitan precisión y restricciones claras.
 
-La Figura 12 muestra el comportamiento del modelo durante el entrenamiento. Se observa una convergencia estable, aunque con señales de sobreajuste moderado a partir de la época 25.
+## 4.3 Usabilidad
 
-```{r fig3-accuracy-loss, out.width="60%", fig.align='center', fig.cap='Figura 12. Evolución de precisión y pérdida durante el entrenamiento'}
-knitr::include_graphics("imgs/drivers_classif/accuracy_loss.png")
-```
+**Complejidad de Entrada:** Formulario estructurado con campos etiquetados, iconos emoji para legibilidad, validación en tiempo real, y áreas expandibles.
 
-La matriz de confusión (Figura 12) muestra un rendimiento destacado en clases clave como `talking_phone`, `texting_phone` y `safe_driving`.
+**Transparencia del Proceso:** Indicadores visuales claros del progreso y estado del sistema durante la generación.
 
-```{r fig4-conf-matrix, out.width="60%", fig.align='center', fig.cap='Figura 13. Matriz de confusión del modelo en el conjunto de validación'}
-knitr::include_graphics("imgs/drivers_classif/confusion_matrix.png")
-```
+---
 
-A continuación se resumen las métricas de evaluación por clase:
+# 5. Aspectos Éticos y Consideraciones {#etica}
 
-```{r tabla-metricas-cnn}
-tabla_metricas <- data.frame(
-  Clase = c("other_activities", "safe_driving", "talking_phone", "texting_phone", "turning"),
-  Precisión = c(0.36, 0.56, 0.81, 0.72, 0.75),
-  Recall = c(0.33, 0.74, 0.73, 0.82, 0.47),
-  F1_Score = c(0.34, 0.63, 0.77, 0.77, 0.58)
-)
+## 5.1 Sesgos Culturales
 
-knitr::kable(tabla_metricas,
-  caption = "Tabla 2: Métricas por clase para el modelo de clasificación de conducción distractiva",
-  format = "html"
-) %>%
-  kableExtra::kable_styling(
-    bootstrap_options = c("striped", "hover"),
-    full_width = FALSE
-  ) %>%
-  kableExtra::column_spec(1:4, width = "4cm") %>%
-  kableExtra::row_spec(0, bold = TRUE, color = "black", background = "lightgray")
-```
+**Identificación:** Los LLMs pueden perpetuar sesgos en representación de personajes, escenarios culturales, y resoluciones narrativas basados en sus datos de entrenamiento.
 
-El modelo alcanzó un accuracy global de **64.7%**, con un F1-score macro de **0.627**. Esto refleja un rendimiento adecuado, especialmente en las clases asociadas a conductas distractoras críticas como `texting_phone` y `talking_phone`.
+**Mitigación:** El sistema permite especificación explícita de elementos culturales por el usuario, no impone restricciones culturales, y preserva la intención original del usuario.
 
+## 5.2 Rol del Usuario Humano
 
+**Colaboración Humano-IA:** El sistema actúa como herramienta de asistencia creativa donde el usuario define elementos narrativos centrales y retiene control editorial completo, mientras el sistema proporciona construcción técnica y coherencia lingüística.
 
-## 4.6 Proceso Iterativo de Optimización del Modelo {#46-proceso-optimizacion}
+**Preservación de Autoría:** El usuario mantiene autoría intelectual, el sistema actúa como herramienta de desarrollo, y se preserva control editorial completo.
 
-A lo largo del desarrollo del módulo de clasificación, realizamos múltiples pruebas con variantes del modelo para alcanzar el rendimiento observado. Este fue el resultado de un proceso iterativo extenso, basado en las siguientes estrategias:
+## 5.3 Uso Responsable
 
-- **Reducción progresiva de la arquitectura:** Partimos de un modelo de referencia más grande compartido en una guía técnica (Ghaffar, 2023), diseñada para más de 22.000 imágenes. Ante la diferencia en la cantidad de datos disponibles (7.267 imágenes), optamos por rediseñar la arquitectura, reduciendo su profundidad y cantidad de parámetros para evitar sobreajuste.
-- **Comparación de técnicas de regularización:** Probamos diversos valores de `Dropout` (entre 0.3 y 0.5) en diferentes bloques, así como el uso de **regularización L2**, observando su efecto sobre las métricas de validación.
-- **Uso de `BatchNormalization` y tuning de learning rate:** Experimentamos con y sin normalización por lotes, y modificamos la tasa de aprendizaje para evitar que el modelo convergiera demasiado rápido en mínimos locales.
-- **Ajuste de resolución de imágenes:** Aunque inicialmente trabajamos con 128x128, descubrimos que el modelo ganaba capacidad discriminativa al aumentar la resolución a 224x224, especialmente en clases como `texting_phone` y `talking_phone`.
-- **Estrategias de entrenamiento y callbacks:** Implementamos `EarlyStopping` para prevenir sobreentrenamiento y restaurar automáticamente los mejores pesos mediante `ModelCheckpoint`.
-- **Múltiples ejecuciones con análisis de métricas:** Tras varias corridas y afinaciones, elegimos el modelo con mejor rendimiento promedio en precisión y F1-score, evaluado sobre un conjunto de validación del 20%.
+**Limitaciones Reconocidas:** Dependencia de calidad de entrada del usuario y variabilidad inherente del modelo estocástico.
 
-Además, se implementaron y evaluaron distintas arquitecturas con el fin de ajustar la capacidad del modelo al tamaño del conjunto de datos. Inicialmente se probó una arquitectura con tres bloques convolucionales, siguiendo el diseño propuesto por Ghaffar (2023). Sin embargo, esta configuración presentaba señales de sobreajuste e inestabilidad en la validación, lo cual motivó una reducción a solo dos bloques `Conv2D` combinados con una sección densa más expresiva.
+**Recomendaciones:** Revisión editorial obligatoria, atribución apropiada del rol de IA, y validación de coherencia cultural cuando sea relevante.
 
-Durante las iteraciones posteriores también se evaluaron:
-- La sustitución de `Flatten()` por `GlobalAveragePooling2D()` para reducir la cantidad de parámetros y estabilizar el entrenamiento.
-- Diversas combinaciones de capas densas (128, 256, 64 unidades) y funciones de activación (`ReLU`, `LeakyReLU`).
-- Aumentos progresivos en el nivel de `Dropout` (0.3 a 0.5).
-- La regularización L2 en distintas capas del modelo.
-- El impacto de ajustar `class_weight` para mejorar el rendimiento en clases minoritarias como `other_activities`.
+---
 
-Cabe destacar que se descartaron arquitecturas basadas en modelos preentrenados (transfer learning con ResNet50 o VGG16), así como ensambles, debido a restricciones de cómputo, y en favor de mantener un modelo entrenable desde cero con una arquitectura interpretable y ajustada a nuestras necesidades. Esta elección permite una integración directa con la herramienta web sin dependencias complejas o tiempos de carga elevados.
+# 6. Resultados y Evaluación {#resultados}
 
+## 6.1 Funcionalidad Técnica
 
-Este proceso iterativo nos permitió alcanzar una arquitectura final con solo dos bloques convolucionales, pero con una parte densa lo suficientemente expresiva como para lograr una precisión y F1-score superiores al 62%.
+El sistema demuestra funcionamiento robusto en validación de entradas (detección efectiva de campos incompletos y contenido sin significado), generación de historias (producción consistente de narrativas coherentes con integración efectiva de elementos especificados), e interfaz de usuario (flujo intuitivo y funcionalidad operativa completa).
 
+## 6.2 Calidad Narrativa
 
-## 4.5 Análisis de Distracciones Comunes y Medidas Preventivas {#45-análisis-de-distracciones-comunes}
+**Coherencia Estructural:** Las historias siguen consistentemente la estructura planteada con integración orgánica de elementos narrativos y consistencia en caracterización.
 
-Las clases `talking_phone` y `texting_phone` fueron las más fácilmente detectables, lo que sugiere que el modelo logró capturar patrones visuales asociados (posición del rostro, manos, presencia del celular). En contraste, `other_activities` mostró mayor confusión, debido a su heterogeneidad.
+**Adherencia a Especificaciones:** Género y tono se reflejan apropiadamente, escenarios se representan fidedignamente, y conflictos se desarrollan coherentemente.
 
-Este análisis permite proponer medidas como:
+**Creatividad:** Las historias evitan formulaicidad excesiva con variación creativa entre generaciones y expansión imaginativa de elementos.
 
-- Instalación de sistemas de monitoreo con alertas automáticas para eventos de distracción detectados.
-- Capacitación a conductores con retroalimentación basada en los comportamientos detectados.
-- Revisión de políticas internas para restringir el uso de dispositivos móviles en ruta.
+## 6.3 Experiencia de Usuario
 
-En conclusión, el modelo cumple con los objetivos de clasificación propuestos, ofreciendo resultados sólidos en las categorías más relevantes para la seguridad vial.
+**Usabilidad:** Formulario comprensible para usuarios no técnicos, mensajes de error claros, y proceso rápido y eficiente.
 
+**Satisfacción:** Generación completa en minutos, funcionalidad de descarga efectiva, y capacidad de iteración para refinamiento.
 
+**Limitaciones:** Dependencia de especificidad en entradas y variabilidad ocasional que puede divergir de expectativas específicas.
 
+---
 
+# 7. Reflexiones y Lecciones Aprendidas {#reflexiones}
 
+## 7.1 Desarrollo de IA Creativa
 
-# 5. Módulo 3 - Recomendación de Destinos de Viaje {#modulo3}
+**Prompt Engineering:** El diseño para tareas creativas requiere equilibrio entre structure y freedom. La contextualización como "escritor profesional" resulta más efectiva que instrucciones técnicas directas.
 
-## 5.1 Introducción
+**Arquitectura Modular:** La separación clara entre componentes facilitó significativamente desarrollo iterativo y depuración del sistema.
 
-En este módulo desarrollamos un sistema de recomendación de destinos basado en filtrado colaborativo. El objetivo es predecir la calificación (`ExperienceRating`) que un usuario daría a un destino turístico, utilizando únicamente su historial de visitas y características embebidas.
+## 7.2 Colaboración Humano-IA
 
-Esta tarea se formuló como un problema de regresión, donde el modelo predice una calificación entre 1 y 5. Se utilizaron embeddings para representar tanto a usuarios como destinos y se entrenó un modelo de factorización matricial con Keras.
+**Usuario como Co-creador:** Los mejores resultados se obtienen cuando el usuario aporta ideas específicas y contexto cultural detallado, permitiendo que el sistema se enfoque en construcción técnica.
 
-## 5.2 Análisis Exploratorio de Datos
+**Control Editorial:** Mantener al usuario en control editorial completo mejora la calidad percibida del output y es éticamente importante.
 
-Antes de construir el modelo, se llevó a cabo un análisis exploratorio para entender la distribución de los datos y evaluar qué variables debían ser incluidas o descartadas.
+## 7.3 Limitaciones de LLMs
 
-### Distribución de Calificaciones
+**Determinismo vs. Creatividad:** Los LLMs generan contenido aparentemente creativo basado en patrones de entrenamiento. La "creatividad" emerge de recombinación novel de elementos aprendidos.
 
-```{r fig1, out.width="60%", fig.align='center', fig.cap='Figura 1. Distribución de la variable ExperienceRating'}
-knitr::include_graphics("imgs/recommend/rating_dist.png")
-```
+**Sesgos Culturales:** Los modelos muestran sesgo hacia narrativas familiares en datos de entrenamiento. La especificación explícita por el usuario ayuda a contrarrestar estos sesgos.
 
-La variable `ExperienceRating` presenta una distribución relativamente uniforme, sin sesgo marcado hacia los extremos. Esto sugiere que el modelo no deberá compensar clases desbalanceadas.
+## 7.4 Decisiones de Diseño
 
-### Destinos más populares
+**Decisiones Técnicas Clave:** DeepSeek V3 seleccionado por balance calidad-costo, temperatura 0.8 optimizada empíricamente, estructura de prompt con emojis para parsing visual, validación multicapa para prevenir errores costosos.
 
-```{r fig2, out.width="60%", fig.align='center', fig.cap='Figura 2. Tipos de destino más comunes en el dataset'}
-knitr::include_graphics("imgs/recommend/common_dest.png")
-```
+**Decisiones de Arquitectura:** Modularidad estricta para facilitar testing y extensión, Streamlit para balance rapidez-funcionalidad, session state management para preservar contexto.
 
-La frecuencia de destinos está relativamente balanceada entre las distintas categorías, destacándose ligeramente los destinos de naturaleza e historia.
+---
 
-### Distribución por género
+# 8. Conclusiones y Trabajo Futuro {#conclusiones}
 
-```{r fig3, out.width="60%", fig.align='center', fig.cap='Figura 3. Distribución por género en los registros'}
-knitr::include_graphics("imgs/recommend/gender_dist.png")
-```
+## 8.1 Logros
 
-Se observa una distribución balanceada entre hombres y mujeres, lo cual es positivo en términos de representatividad del modelo.
+**Sistema Funcional Completo:** Agente operacional con integración efectiva entre validación, prompt engineering, comunicación con APIs, e interfaz intuitiva.
 
-### Calificación por tipo de destino
+**Arquitectura Escalable:** Implementación modular que facilita mantenimiento, testing, y extensión futura con componentes independientes.
 
-```{r fig4, out.width="60%", fig.align='center', fig.cap='Figura 4. Distribución de ratings por tipo de destino'}
-knitr::include_graphics("imgs/recommend/rating_by_dest_type.png")
-```
+**Experiencia Optimizada:** Interfaz que permite a usuarios no técnicos generar historias personalizadas eficientemente con feedback claro.
 
-Las medianas de calificación son similares entre los distintos tipos de destino, sin variaciones fuertes que justifiquen un modelo específico por categoría.
+## 8.2 Limitaciones
 
-### Correlaciones con `ExperienceRating`
+**Dependencias Externas:** Dependencia completa de servicios externos introduce puntos de falla potenciales y dependency on pricing structures.
 
-```{r fig5, out.width="60%", fig.align='center', fig.cap='Figura 5. Correlación de variables con ExperienceRating'}
-knitr::include_graphics("imgs/recommend/corr_obj.png")
-```
+**Escalabilidad:** Costos de API pueden volverse prohibitivos para uso extensivo sin optimizaciones adicionales, y arquitectura actual no optimizada para múltiples usuarios simultáneos.
 
-No se evidencian correlaciones lineales fuertes con la variable objetivo, lo que valida el uso de una red neuronal para modelar relaciones no lineales complejas.
+## 8.3 Trabajo Futuro
 
-### Preferencias más comunes
+**Mejoras Técnicas:** Error handling robusto con retry logic, sistema de cache para reducir costos, soporte múltiples proveedores LLM con failover automático.
 
-```{r fig6, out.width="60%", fig.align='center', fig.cap='Figura 6. Preferencias más comunes de los usuarios'}
-knitr::include_graphics("imgs/recommend/user_preferences.png")
-```
+**Funcionalidades Avanzadas:** Historia interactiva por capítulos, estilos de autor personalizados, collaborative writing, rich media integration.
 
-Las preferencias de los usuarios son consistentes con las categorías más visitadas, especialmente el interés por lo histórico y la naturaleza.
+**Investigación:** Evaluación automatizada de calidad narrativa, bias detection y mitigation, user studies formales, integración de modelos locales.
 
-### Distribución de visitas por mes
+## 8.4 Reflexión Final
 
-```{r fig7, out.width="60%", fig.align='center', fig.cap='Figura 7. Cantidad de visitas registradas por mes'}
-knitr::include_graphics("imgs/recommend/visits_by_mo.png")
-```
+Este proyecto demuestra el potencial de LLMs como herramientas de asistencia creativa cuando se implementan con focus en colaboración humano-IA. La clave del éxito reside en reconocer fortalezas complementarias: humanos aportan creatividad, contexto y juicio, mientras LLMs proporcionan ejecución técnica, fluidez lingüística y capacidad de iteración rápida.
 
-Los datos están concentrados en el primer trimestre del año. Esto debe tenerse en cuenta para evitar sesgos temporales en los resultados.
+El futuro de sistemas de IA creativa reside en este enfoque colaborativo donde la tecnología amplifica rather than replaces creatividad humana, manteniendo autoría humana while leveraging capacidades de IA para superar barreras técnicas en el proceso creativo.
 
-## 5.3 Arquitectura del Modelo
+---
 
-El modelo empleado es una red neuronal basada en factorización matricial simple con Keras. Esta arquitectura consiste en:
-
-- Embedding para `UserID` y `DestinationID`
-- Producto punto entre vectores de usuario y destino
-- Salida única como predicción continua (regresión)
-
-Se utilizó la función de pérdida MSE y el optimizador Adam. El modelo fue entrenado con `EarlyStopping` y `ModelCheckpoint`.
-
-## 5.4 Evaluación y Resultados
-
-### Curva de pérdida durante el entrenamiento
-
-```{r fig9, out.width="60%", fig.align='center', fig.cap='Figura 8. Evolución de la pérdida MSE en train y validación'}
-knitr::include_graphics("imgs/recommend/mse.png")
-```
-
-Se observa una clara convergencia del modelo. La validación se estabiliza alrededor de la época 15, lo cual sugiere una buena capacidad de generalización.
-
-### Predicción vs Real
-
-```{r fig8, out.width="60%", fig.align='center', fig.cap='Figura 9. Comparación entre rating real y predicho'}
-knitr::include_graphics("imgs/recommend/predictions.png")
-```
-
-El modelo tiende a subestimar ligeramente los valores altos de rating, pero logra capturar la tendencia general de los datos.
-
-### Métricas Finales
-
-```{r tabla-metricas-recom, echo=FALSE}
-knitr::kable(
-  data.frame(
-    Métrica = c("MAE", "RMSE", "Correlación"),
-    Valor = c(1.226, 1.493, 0.083)
-  ),
-  caption = "Tabla 1: Métricas finales del modelo de recomendación",
-  format = "html"
-) %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE) %>%
-  kableExtra::row_spec(0, bold = TRUE, color = "black", background = "lightgray")
-```
-
-## 5.5 Conclusiones
-
-- Se logró construir un sistema de recomendación con un error promedio de 1.2 estrellas, lo cual es aceptable para fines exploratorios.
-- El modelo es simple, eficiente y puede integrarse fácilmente en una plataforma de turismo inteligente.
-- El filtrado colaborativo con embeddings demuestra ser efectivo incluso en conjuntos de datos con poca correlación lineal.
-
-
-
-
-# 6. Herramienta Web Integrada {#herramienta-web}
-
-Gráficas de predicción vs. demanda real para cada ruta de transporte.
-
-Ejemplos de imágenes clasificadas correctamente y casos erróneos.
-
-Ejemplos de recomendaciones generadas para diferentes usuarios, mostrando destinos de viaje basados en
-preferencias previas.
-Análisis de la efectividad de las recomendaciones (usuarios satisfechos, incremento en la demanda de
-ciertas rutas, etc.).
-
-
-# 7. Resultados Generales y Discusión {#resultados}
-
-
-## Lecciones Aprendidas y Limitaciones del Módulo 2
-
-Durante el desarrollo del modelo de clasificación de conducción distractiva, aprendimos que construir una arquitectura CNN desde cero nos permite tener un mayor control sobre la complejidad del modelo y adaptarlo eficientemente al tamaño del dataset disponible. A diferencia de las arquitecturas preentrenadas, nuestra versión manual balanceó precisión y eficiencia computacional, logrando buenos resultados en clases críticas como `texting_phone` y `talking_phone`.
-
-También descubrimos la importancia del **aumento de datos y la regularización**, especialmente cuando se trabaja con volúmenes moderados de imágenes. Técnicas como `Dropout`, `L2`, y `class_weights` fueron claves para evitar el sobreajuste sin sacrificar rendimiento.
-
-Sin embargo, enfrentamos limitaciones que vale la pena mencionar:
-
-- La clase `other_activities` fue difícil de modelar debido a su heterogeneidad. Una mejor estrategia podría ser subdividirla en comportamientos más específicos.
-- Aunque el modelo fue entrenado y evaluado en condiciones realistas, su despliegue en entornos reales requeriría ajustes adicionales como detección en tiempo real, control de calidad en imágenes y latencia mínima.
-
-Estas lecciones sientan las bases para futuras mejoras del sistema y para su integración en contextos reales de monitoreo de seguridad vial.
-
-## Lecciones Aprendidas y Limitaciones del Módulo 3
-
-Durante el desarrollo del sistema de recomendación basado en filtrado colaborativo, comprendimos que incluso modelos simples como la factorización matricial con embeddings pueden ofrecer un rendimiento competitivo cuando se entrenan adecuadamente y se alimentan con datos bien estructurados.
-
-Una de las principales lecciones fue el valor de **representar entidades (usuarios y destinos) mediante vectores entrenables**, lo cual permite capturar relaciones latentes sin necesidad de utilizar información explícita o textual. Esta estrategia redujo la dimensionalidad del problema y facilitó la generalización.
-
-Asimismo, aprendimos que, a pesar de la aparente debilidad de correlaciones lineales entre variables y la calificación (`ExperienceRating`), un modelo no lineal fue capaz de extraer patrones útiles para la predicción.
-
-Sin embargo, enfrentamos algunas limitaciones importantes:
-
-- El modelo tiende a **subestimar calificaciones altas** y sobreestimar las bajas, probablemente debido a la regularización implícita en el aprendizaje de los embeddings.
-- El sistema no incorpora aún información contextual rica (como texto libre o comportamiento reciente), lo cual limita su capacidad para personalizar recomendaciones más allá del historial básico.
-- Las recomendaciones actuales se basan en **preferencias históricas globales**, sin tener en cuenta factores como la temporalidad, la disponibilidad de destinos o las restricciones del usuario.
-
-Estas experiencias nos orientan hacia futuras mejoras como la incorporación de filtros dinámicos, variables contextuales y estrategias híbridas que combinen filtrado colaborativo con contenido explícito.
-
-
-
-
-# 8. Conclusiones y Recomendaciones {#conclusiones}
-
-
-# 9. Aspectos Éticos y Creatividad {#etica}
-
-
-# 10. Bibliografía {#bibliografia}
-
-
+# 9. Bibliografía {#bibliografia}
 
 <h2>Referencias</h2>
 
 <ul>
-  <li>Xiao, X., Li, C., Wang, X., & Zeng, A. (2025). Personalized tourism recommendation model based on temporal multilayer sequential neural network. <i>Scientific Reports, 15</i>(1), 382. <a href="https://doi.org/10.1038/s41598-024-84581-z" target="_blank">https://doi.org/10.1038/s41598-024-84581-z</a></li>
-  <li>Sorum, N. G., & Sorum, M. G. (2025). Modeling of injury severity of distracted driving accident using statistical and machine learning models. <i>PLoS One, 20</i>(6), e0326113. <a href="https://doi.org/10.1371/journal.pone.0326113" target="_blank">https://doi.org/10.1371/journal.pone.0326113</a></li>
-  <li>Khan, M. A., & Auvee, R. B. Z. (2024). Comparative analysis of resource-efficient CNN architectures for brain tumor classification. <i>arXiv preprint</i> <a href="https://arxiv.org/abs/2411.15596" target="_blank">arXiv:2411.15596</a></li>
-  <li>Ghaffar, S. (2023). <i>Classification of images to detect distracted drivers by using convolutional neural networks</i> (Master’s thesis, Toronto Metropolitan University). Toronto, Canada.</li>
-  <li>OpenAI. (2024). <i>ChatGPT (June 2025 version)</i> [Large language model]. <a href="https://chat.openai.com/" target="_blank">https://chat.openai.com</a></li>
-  <li>Anthropic. (2024). <i>Claude AI (Claude 4 Sonnet)</i> [Large language model]. <a href="https://claude.ai/" target="_blank">https://claude.ai</a></li>
+  <li>DeepSeek AI. (2024). <i>DeepSeek-V3: Advanced Large Language Model</i> [Large language model]. <a href="https://www.deepseek.com/" target="_blank">https://www.deepseek.com/</a></li>
+  <li>OpenRouter AI. (2024). <i>OpenRouter API Documentation</i>. <a href="https://openrouter.ai/docs" target="_blank">https://openrouter.ai/docs</a></li>
+  <li>Streamlit Inc. (2024). <i>Streamlit Documentation</i>. <a href="https://docs.streamlit.io/" target="_blank">https://docs.streamlit.io/</a></li>
 </ul>
 
-<h2 id="11-anexos">11 Anexos</h2>
+<h2 id="10-anexos">10 Anexos</h2>
 
-<h3>Datasets</h3>
+<h3>Información del Proyecto</h3>
 <ul>
-  <li><b>Clasificación de Conducción Distractiva:</b> <a href="https://www.kaggle.com/datasets/arafatsahinafridi/multi-class-driver-behavior-image-dataset" target="_blank">Kaggle Dataset</a></li>
-  <li><b>Sistema de Recomendación Turística:</b> <a href="https://www.kaggle.com/datasets/amanmehra23/travel-recommendation-dataset" target="_blank">Kaggle Dataset</a></li>
-  <li><b>Predicción de Demanda (Referencia de inspiración):</b> <a href="https://www.geeksforgeeks.org/machine-learning/transport-demand-prediction-using-regression/" target="_blank">GeeksforGeeks</a></li>
-</ul>
-
-<h3>Repositorios de Código</h3>
-<ul>
-  <li><b>Repositorio principal:</b> <a href="https://github.com/vasquez-esteban/RNA_G4_Prediccion_Clasificacion_Recomendacion" target="_blank">GitHub - Clasificación y análisis</a></li>
-  <li><b>App web:</b> <a href="https://github.com/vasquez-esteban/RNA_G4_PCR_App" target="_blank">GitHub - App Web</a></li>
-</ul>
-
-<h3>Aplicación Web Desplegada</h3>
-<ul>
-  <li><a href="https://huggingface.co/spaces/evasp/rna-g4-trabajo3" target="_blank">Hugging Face Space – Demo interactiva</a></li>
+  <li><b>Repositorio principal:</b> <a href="#" target="_blank">GitHub - RNA_G4_T4 [https://github.com/vasquez-esteban/RNA_G4_T4]</a></li>
+  <li><b>Aplicación web desplegada:</b> <a href="#" target="_blank">[https://rna-g4-generador-historias.streamlit.app/]</a></li>
 </ul>
 
 <h3>Recursos Complementarios</h3>
 <ul>
-  <li><b>Presentación y video (por definir):</b> <a href="#" target="_blank">[Enlace pendiente]</a></li>
+  <li><b>Video presentación:</b> <a href="#" target="_blank">[Enlace pendiente]</a></li>
 </ul>
