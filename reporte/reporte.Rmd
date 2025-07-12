@@ -27,7 +27,9 @@ output:
 
 ```{r setup, include=FALSE}
 if (!require("pacman")) install.packages("pacman")
+
 pacman::p_load(knitr, kableExtra, magrittr)
+
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
@@ -313,11 +315,11 @@ El futuro de sistemas de IA creativa reside en este enfoque colaborativo donde l
 
 <h3>Información del Proyecto</h3>
 <ul>
-  <li><b>Repositorio principal:</b> <a href="#" target="_blank">GitHub - RNA_G4_T4 [https://github.com/vasquez-esteban/RNA_G4_T4]</a></li>
-  <li><b>Aplicación web desplegada:</b> <a href="#" target="_blank">[https://rna-g4-generador-historias.streamlit.app/]</a></li>
+  <li><b>Repositorio principal:</b> <a href="https://github.com/vasquez-esteban/RNA_G4_T4" target="_blank">GitHub - RNA_G4_T4</a></li>
+  <li><b>Aplicación web desplegada:</b> <a href="https://rna-g4-generador-historias.streamlit.app/" target="_blank">Aplicación en Streamlit</a></li>
 </ul>
 
 <h3>Recursos Complementarios</h3>
 <ul>
-  <li><b>Video presentación:</b> <a href="#" target="_blank">[Enlace pendiente]</a></li>
+  <li><b>Video presentación:</b> <a href="https://youtube.com" target="_blank">Enlace pendiente</a></li>
 </ul>

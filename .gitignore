@@ -9,6 +9,9 @@
 # History files
 .Rhistory
 .Rapp.history
+/reporte/renv/
+/reporte/.Rprofile
+/reporte/renv.lock
 
 # Session Data files
 .RData
