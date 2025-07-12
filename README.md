@@ -152,5 +152,5 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 
 ## 🔗 Referencias
 
-- Reporte Técnico: _en preparación_
+- Reporte Técnico: (Rpubs)[https://rpubs.com/evasp/rna-g4-trabajo4]
 - Lista de malas palabras: <https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words>
