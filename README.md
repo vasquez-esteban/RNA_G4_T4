@@ -1,71 +1,67 @@
-# Proyecto: Agente Creativo de Historias con LLMs
+# 📖 Agente Creativo de Historias con LLMs
 
-## Plan de Trabajo
-
-### ✅ 1: Diseño y Base Técnica
-
-- ✅ Implementar el Módulo de Procesamiento de Entradas.
-- ✅ Estrategia de prompting inicial para un género.
-
----
-
-### ✅ 2: Generación y UI
-
-- 🟡 Motor de generación de historias (conexión API).
-- ✅ Pruebas de generación.
-- ✅ Desarrollar la Interfaz de Usuario.
+Genera relatos cortos interactivos (300 – 800 palabras) a partir de parámetros dados
+por el usuario — personajes, escenario, género, tono, conflicto y más — controlando
+estilo y longitud mediante _prompt engineering_.  
+La aplicación se ejecuta sobre **Streamlit**, emplea modelos LLM vía **OpenRouter**
+y persiste configuraciones favoritas localmente.
 
 ---
 
-### ✅ 3: Mejora, Pruebas y Extras
+## ⚖️ Consideraciones Éticas
 
-- ✅ Mejoras en prompts (estructura, personajes).
-- ✅ Manejo de estado y errores.
-- 🟡 Generación de imágenes (Si hay tiempo).
+El proyecto adopta una política de **uso responsable y respeto a la creación literaria**:
 
----
+1. **No imitación de autores famosos**  
+   Optamos por no incluir un modo “escribe como _X_”. Aunque técnicamente viable,
+   replicar estilos protegidos puede infringir derechos de autor, devaluar la obra
+   original o inducir a confusión sobre su procedencia.
 
-### 🟡 4: Documentación y Entregables
+2. **Prevención de contenido dañino**  
+   Integramos un módulo `filter_content.py` que detecta y bloquea lenguaje sexual
+   explícito, insultos, discriminación y drogas antes y después de la generación.  
+   Esto minimiza la posibilidad de que la IA produzca material ofensivo.
 
-- 🟡 Documentar código y decisiones.
-- 🟡 Generar historias de muestra.
-- 🟡 Video demostración.
-- 🟡 Redactar reporte técnico.
-- 🟡 Revisión final, entrega.
+3. **Sesgos y representaciones justas**  
+   Reconocemos que los LLMs reflejan los sesgos de sus datos de entrenamiento.
+   Invitamos a los usuarios a **revisar críticamente** las historias y reportar
+   estereotipos o parcialidades. Futuras versiones incluirán análisis de sesgo
+   automatizado.
+
+4. **Privacidad del usuario**  
+   Los textos introducidos permanecen en el navegador; sólo los prompts mínimos
+   se envían a la API. Las configuraciones favoritas se almacenan en un archivo
+   local JSON dentro de `streamlit_app/user_configs/`.
 
 ---
 
 ## 📁 Estructura de Carpetas
 
-```
-streamlit_app/
-├── app.py
-
-core/
-├── prompt_engineering.py
-├── story_generator.py
-├── input_validation.py
-
-config/
-├── settings.py
-
-examples/
-├── historia_fantasia.txt
-
-assets/
-├── portada_historia_1.png
-
-reporte/
-├── reporte_tecnico.md
-
-tests/
-├── test_prompt_engineering.py
-
-.streamlit/
-├── secrets.toml
-
-requirements.txt
-README.md
+```text
+.
+├── streamlit_app/
+│   ├── app.py
+│   └── user_configs/
+│       └── configuraciones_favoritas.json
+├── core/
+│   ├── input_validation.py
+│   ├── filter_content.py
+│   ├── prompt_engineering.py
+│   └── story_generator.py
+├── config/
+│   └── settings.py
+├── tests/
+│   └── test_prompt_engineering.py
+├── examples/
+│   └── historia_fantasia.txt
+├── assets/
+│   └── portada_historia_1.png
+├── reporte/
+│   └── reporte_tecnico.md
+├── .streamlit/
+│   └── secrets.toml
+├── requirements.txt
+└── README.md
 ```
 
 ---
@@ -73,53 +69,55 @@ README.md
 ## 🧱 Arquitectura del Sistema
 
 ```mermaid
-graph TD
-  Usuario -->|interacción| UI[Interfaz de Usuario]
-  UI -->|valida entrada| Entrada[Módulo de Entrada]
-  Entrada -->|input limpio| Prompting[Generador de Prompt]
-  Prompting -->|prompt| LLMAPI[API de LLM _OpenAI/Claude_]
-  LLMAPI -->|respuesta| Historia[Motor de Historia]
-  Historia --> UI
-  Historia -->|opcional| Imagen[Generador de Imagen _Bonus_]
-  subgraph Módulos Internos
-    Entrada
-    Prompting
-    Historia
-    Imagen
+flowchart TD
+  %% ───── Agrupación de la lógica de negocio ─────
+  subgraph Core
+    direction LR
+    iv[input_validation.py]
+    pc[prompt_engineering.py]
+    sg[story_generator.py]
+    fc[filter_content.py]
   end
-  subgraph Servicios Externos
-    LLMAPI
-  end
-```
 
-## Guía Rápida de Ejecución
+  %% ───── Actores y almacenamiento local ─────
+  user((👤 Usuario)) --> app[Web UI<br>streamlit_app/app.py]
+  app <---> uc[(user_configs<br>JSON)]
 
-### 1. Clonar el repositorio
+  %% ───── Flujo principal ─────
+  app --> iv
+  iv  --> pc
+  pc  --> sg
+  sg  --> fc
+  fc  --> app
 
-```bash
-git clone https://github.com/vasquez-esteban/RNA_G4_PCR_App
-cd RNA_G4_PCR_App
-```
-
-### 2. Configurar entorno Python (Linux/macOS)
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-source setup.sh
-```
-
-#### En Windows:
-
-```bash
-python3 -m venv .venv
-.venv\Scripts\activate
-setup.bat
+  %% ───── Dependencias externas ─────
+  sg  --> api[(OpenRouter API)]
+  app --> settings[config/settings.py]
 ```
 
 ---
 
-## Ejecutar la aplicación web
+## 🚀 Guía Rápida de Ejecución
+
+### 1. Clonar y preparar ambiente
+
+```bash
+git clone https://github.com/vasquez-esteban/RNA_G4_PCR_App
+cd RNA_G4_PCR_App
+python3 -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 2. Variables de entorno
+
+Crear `.streamlit/secrets.toml` con:
+
+```toml
+OPENROUTER_API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+### 3. Iniciar aplicación
 
 ```bash
 streamlit run streamlit_app/app.py
@@ -127,26 +125,32 @@ streamlit run streamlit_app/app.py
 
 ---
 
-## Despliegue Con Streamlit
+## 📝 Scripts de utilidad
 
-### Variables de entorno necesarias
-
-Agregar las siguientes variables de entorno en un archivo `.streamlit/secrets.toml`:
-
-`OPENAI_API_KEY = "sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXX"`
+| Archivo                      | Propósito                                    |
+| ---------------------------- | -------------------------------------------- |
+| `core/input_validation.py`   | Valida y sanitiza los campos del usuario     |
+| `core/filter_content.py`     | Filtra lenguaje sensible en entrada y salida |
+| `core/prompt_engineering.py` | Construye prompts específicos por género     |
+| `core/story_generator.py`    | Llama a la API de LLM y maneja errores       |
+| `streamlit_app/app.py`       | Interfaz web, estado y persistencia          |
 
 ---
 
-## Requisitos
+## ✅ Requisitos
 
-- Python 3.9+
+- **Python 3.9+**
+- Dependencias en `requirements.txt`
 
-Consultar `requirements.txt` para más detalles.
+---
 
-## Licencia
+## 📄 Licencia
 
 Distribuido bajo la [Licencia MIT](LICENSE).
 
-## Referencias
+---
 
-- Reporte Técnico [Link](https://rpubs.com)
+## 🔗 Referencias
+
+- Reporte Técnico: _en preparación_
+- Lista de malas palabras: <https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words>

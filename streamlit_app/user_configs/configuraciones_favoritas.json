@@ -1,0 +1,13 @@
+{
+  "Johh Snow": {
+    "personajes": "John Snow",
+    "escenario": "La batalla de los hermanos",
+    "género": "Terror",
+    "tono": "Oscuro",
+    "conflicto": "Es un juego importante",
+    "obstaculos": "Alguien de los dos gana",
+    "resolucion": "Hay un final interesante",
+    "longitud": "Corta",
+    "incluir_dialogo": false
+  }
+}
