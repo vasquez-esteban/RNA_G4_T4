@@ -192,7 +192,7 @@ El sistema establece conexión con OpenRouter utilizando configuraciones especí
 
 - **Modelo:** DeepSeek V3 (balance calidad-costo)
 
-- **Temperatura:** 0.8 (equilibrio creatividad-coherencia, siguiendo las recomendaciones de Boonstra, 2025, para salidas imaginativas pero coherentes)
+- **Temperatura:** 0.8 (equilibrio creatividad-coherencia, siguiendo las recomendaciones de (Boonstra, 2025), para salidas imaginativas pero coherentes)
 
 - **Max_tokens:** 1500 (suficiente para rango especificado)
 
@@ -216,7 +216,7 @@ La ingeniería de prompts para tareas creativas difiere de las factuales, requir
 
 - **Contexto Emocional:** Establecimiento de tono y atmósfera
 
-- **Role-playing:** Contextualización como "escritor profesional especializado" (técnica de role prompting según Boonstra, 2025)
+- **Role-playing:** Contextualización como "escritor profesional especializado" técnica de role prompting (Boonstra, 2025)
 
 - **Estructuras Flexibles:** Guías que preservan creatividad
 
