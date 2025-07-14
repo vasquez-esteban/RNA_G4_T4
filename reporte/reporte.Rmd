@@ -37,282 +37,436 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 ## Tabla de Contenidos
 
-- [Resumen Ejecutivo](#resumen-ejecutivo)
-- [1. Introducción](#introduccion)
-- [2. Arquitectura del Sistema](#arquitectura)
-- [3. Implementación Técnica](#implementacion)
-- [4. Desafíos y Soluciones](#desafios)
-- [5. Aspectos Éticos y Consideraciones](#etica)
-- [6. Resultados y Evaluación](#resultados)
-- [7. Reflexiones y Lecciones Aprendidas](#reflexiones)
-- [8. Conclusiones y Trabajo Futuro](#conclusiones)
-- [9. Bibliografía](#bibliografia)
-- [10. Anexos](#anexos)
+- [Resumen Ejecutivo](#resumen)
+
+- [1. Introducción y Objetivos](#introduccion)
+  - [1.1 Objetivos de Aprendizaje Alcanzados](#objetivos-aprendizaje)
+  - [1.2 Descripción del Proyecto Implementado](#descripcion-proyecto)
+  - [1.3 Contexto Tecnológico y Motivación](#contexto-tecnologico)
+
+- [2. Diseño de Agente Basado en LLM](#diseno-agente)
+  - [2.1 Principios de Diseño del Agente](#principios-diseno)
+  - [2.2 Arquitectura Conceptual del Agente](#arquitectura-conceptual)
+    - [Capa de Interfaz Humana](#capa-interfaz)
+    - [Capa de Procesamiento Inteligente](#capa-procesamiento)
+    - [Capa de Generación LLM](#capa-generacion)
+    
+- [3. Implementación Técnica](#implementacion-tecnica)
+  - [3.1 Módulo de Procesamiento de Entradas](#modulo-procesamiento)
+    - [Sistema de Validación Multicapa](#validacion-multicapa)
+  - [3.2 Motor de Generación de Historias](#motor-generacion)
+    - [Interfaz con API LLM](#interfaz-api)
+    - [Estrategias por Género](#estrategias-generacion)
+  - [3.3 Interfaz de Usuario Streamlit](#interfaz-streamlit)
+    - [Diseño de Formulario Interactivo](#formulario-interactivo)
+
+- [4. Estrategia de Ingeniería de Prompts](#ingenieria-prompts)
+  - [4.1 Fundamentos de Prompt Engineering Creativo](#fundamentos-prompt)
+  - [4.2 Arquitectura de Prompts Implementada](#arquitectura-prompts)
+    - [Estructura Base](#estructura-base)
+    - [Control de Longitud Preciso](#control-longitud)
+
+- [5. Evaluación y Análisis de Resultados](#evaluacion-resultados)
+  - [5.1 Criterios de Evaluación Narrativa](#criterios-evaluacion)
+  - [5.2 Historias de Muestra y Análisis](#historias-muestra)
+    - [Historia Fantasía Épica: "El Artefacto de Sylvaria"](#historia-fantasia)
+    - [Historia Misterio Policial: "Los Códigos de Brumablanca"](#historia-misterio)
+    - [Historia Romance Contemporáneo: "Recetas del Corazón"](#historia-romance)
+    - [Historia Ciencia Ficción: "Protocolo Argonauta"](#historia-ciencia-ficcion)
+    - [Historia Terror Gótico: "El Diario del Inquisidor"](#historia-terror)
+    - [Historia Caso Extremo: "La Paradoja del Tiempo Culinario"](#historia-caso-extremo)
+
+- [6. Conclusiones y Perspectivas](#conclusiones)
+  - [6.1 Cumplimiento de Objetivos](#cumplimiento-objetivos)
+  - [6.2 Limitaciones y Trabajo Futuro](#limitaciones-futuro)
+  
+- [7. Bibliografía](#bibliografia)
 
 ---
 
-## Resumen Ejecutivo {#resumen-ejecutivo}
+# Resumen Ejecutivo {#resumen}
 
-Este proyecto desarrolla un **Agente Creativo de Historias** basado en LLMs que genera narrativas personalizadas utilizando el modelo DeepSeek V3 a través de OpenRouter. El sistema permite a usuarios especificar personajes, escenarios, géneros, tonos y elementos de trama para producir historias coherentes de 300-800 palabras.
+Este proyecto desarrolla un agente creativo basado en LLMs para generación colaborativa de historias. Utiliza DeepSeek V3 através de OpenRouter API con arquitectura modular en Python e interfaz Streamlit. Los usuarios especifican elementos narrativos (personajes, escenario, género, tono) para generar historias originales de 300-800 palabras.
 
-La arquitectura modular incluye validación de entradas, ingeniería de prompts, generación con LLM e interfaz web Streamlit. El proyecto aborda el equilibrio entre creatividad y control, manejo de APIs externas, y consideraciones éticas sobre sesgos en contenido generado automáticamente.
+**Objetivos Cumplidos:** Prompts especializados por género, validación robusta, gestión de estado persistente, y evaluación de calidad narrativa.
 
-Los resultados demuestran capacidad para generar historias narrativamente sólidas que respetan especificaciones del usuario, con una interfaz accesible que facilita exploración creativa e iteración sobre ideas narrativas.
+**Contribuciones:** Estrategias diferenciadas de prompt engineering creativo, análisis de colaboración humano-IA, y sistemas de filtrado ético.
 
----
+# 1. Introducción y Objetivos {#introduccion}
 
-# 1. Introducción {#introduccion}
+## 1.1 Objetivos de Aprendizaje Alcanzados {#objetivos-aprendizaje}
 
-## 1.1 Contexto y Motivación
+**Comprensión de Principios de Agentes LLM:** Desarrollo de agente interactivo que colabora con usuarios para escritura creativa, implementando principios de diseño modular y gestión de estado.
 
-Los LLMs han revolucionado la generación de texto creativo, pero requieren herramientas que combinen creatividad controlada con usabilidad práctica. Este proyecto surge de la necesidad de crear un sistema que ofrezca control granular sobre elementos narrativos mientras mantiene una interfaz accesible para usuarios no técnicos.
+**Prompts Efectivos para Tareas Creativas:** Creación de estrategias de prompt engineering diferenciadas por género narrativo, con instrucciones específicas para fantasía, misterio, terror, ciencia ficción, romance, comedia y aventura.
 
-La escritura creativa tradicional requiere dominio técnico del lenguaje y capacidad de estructurar narrativas complejas. Los LLMs modernos han demostrado capacidades notables, pero su naturaleza probabilística introduce desafíos únicos para crear herramientas que combinen creatividad controlada con usabilidad práctica.
+**Procesamiento y Validación de Entradas:** Sistema robusto que maneja formularios estructurados y descripciones en lenguaje natural, proporcionando mensajes de error específicos.
 
-## 1.2 Planteamiento del Problema
+**Manejo de APIs y Gestión de Errores:** Integración efectiva con OpenRouter API, implementación de timeouts y manejo comprehensivo de excepciones.
 
-Los principales desafíos incluyen:
+## 1.2 Descripción del Proyecto Implementado {#descripcion-proyecto}
 
-- **Control vs. Creatividad:** Equilibrar especificaciones del usuario con originalidad del output
-- **Prompts Creativos:** Diseñar prompts que guíen efectivamente sin limitar creatividad  
-- **Validación Compleja:** Validar elementos narrativos subjetivos sin ser restrictivo
-- **Gestión de Recursos:** Optimizar uso de APIs manteniendo alta disponibilidad
-- **Consideraciones Éticas:** Minimizar sesgos culturales y de género en historias generadas
+El agente creativo genera relatos cortos mediante colaboración humano-IA. El sistema acepta especificaciones detalladas del usuario y produce narrativas coherentes que incorporan elementos solicitados manteniendo adherencia al género.
 
-## 1.3 Objetivos
+**Elementos Manejados:**
 
-**Objetivo Principal:** Desarrollar un agente inteligente para generar historias narrativamente coherentes a partir de especificaciones estructuradas.
+- **Personajes:** Nombre, rol, rasgos de personalidad
 
-**Objetivos Técnicos:**
-- Sistema robusto de validación de entradas
-- Estrategia optimizada de ingeniería de prompts  
-- Arquitectura modular escalable
-- Integración eficiente con APIs de LLMs
+- **Escenario:** Período temporal, ubicación, atmósfera
 
-**Objetivos de Usabilidad:**
-- Interfaz web intuitiva para usuarios no técnicos
-- Retroalimentación inmediata sobre validez de entradas
-- Iteración fluida sobre ideas narrativas
+- **Género:** 7 géneros principales con estrategias específicas
 
-## 1.4 Alcances y Limitaciones
+- **Tono:** Humorístico, Oscuro, Caprichoso, Dramático, Satírico
 
-**Alcances:** Generación de historias cortas (300-800 palabras) en múltiples géneros, interfaz web interactiva, funcionalidades de descarga, arquitectura modular escalable.
+- **Conflicto Central:** Problema principal que impulsa la narrativa
 
-**Limitaciones:** Dependencia de APIs externas, optimización para narrativas cortas, evaluación subjetiva de calidad, sesgos del modelo base, costos operacionales.
+- **Obstáculos Principales:** Desafíos específicos que enfrentan los personajes
 
----
+- **Resolución Esperada:** Desenlace deseado para la historia
 
-# 2. Arquitectura del Sistema {#arquitectura}
+- **Longitud:** Corta (300-400), Mediana (400-600), Larga (600-800 palabras)
 
-## 2.1 Diseño Modular
+## 1.3 Contexto Tecnológico y Motivación {#contexto-tecnologico}
 
-La arquitectura sigue un paradigma modular que separa responsabilidades funcionales: validación de entradas, construcción de prompts, generación mediante LLM e interfaz de usuario. Esta separación facilita mantenimiento, testing y escalabilidad.
+Los LLMs han transformado la generación de texto creativo, pero requieren diseño cuidadoso para equilibrar control del usuario con calidad del output. Este proyecto aborda el desafío de crear herramientas que permitan especificación granular de elementos narrativos mientras preservan creatividad.
 
-La estructura del proyecto refleja esta modularidad:
+# 2. Diseño de Agente Basado en LLM {#diseno-agente}
 
-- **streamlit_app/**: Interfaz de usuario y orquestación
+## 2.1 Principios de Diseño del Agente {#principios-diseno}
 
-- **core/**: Lógica de negocio principal (validación, prompts, generación)
+**Principio de Colaboración Activa:** El agente actúa como co-creador inteligente, no como generador autónomo. El usuario mantiene control creativo proporcionando elementos narrativos específicos.
 
-- **config/**: Configuración centralizada del sistema
+**Principio de Especialización por Contexto:** Diferentes géneros narrativos requieren aproximaciones distintas. El agente implementa estrategias específicas para cada género.
 
-- **examples/**: Ejemplos y casos de prueba
+**Principio de Retroalimentación Constructiva:** El sistema proporciona validación inmediata y sugerencias específicas para entradas incompletas.
 
-## 2.2 Componentes Principales
+## 2.2 Arquitectura Conceptual del Agente {#arquitectura-conceptual}
 
-### Módulo de Configuración
-Centraliza parámetros del modelo LLM (DeepSeek V3, temperatura 0.8, límites de tokens 1500), opciones de usuario (géneros, tonos, longitudes) y especificaciones de formato.
+### Capa de Interfaz Humana {#capa-interfaz}
 
-### Módulo de Validación  
-Implementa validación multicapa: presencia de campos, contenido significativo, formato válido, opciones predefinidas, y estructura narrativa completa.
+- Captura estructurada de especificaciones narrativas
 
-### Módulo de Ingeniería de Prompts
-Construye prompts optimizados para creatividad: estructura narrativa clara, contextualización como "escritor profesional", integración de elementos narrativos, y control de extensión.
+- Retroalimentación inmediata con validación en tiempo real
 
-### Módulo de Generación
-Maneja integración con OpenRouter y DeepSeek V3: configuración de cliente, parámetros optimizados, gestión de errores, y headers para analytics.
+- Gestión de configuraciones favoritas
 
-## 2.3 Flujo de Procesamiento
+### Capa de Procesamiento Inteligente {#capa-procesamiento}
 
-El sistema sigue una secuencia lógica:
+- Validación semántica de completitud y coherencia
 
-1. **Captura de Entradas:** Formulario estructurado en Streamlit
+- Construcción de contexto optimizado
 
-2. **Validación:** Verificación exhaustiva antes de procesamiento
+- Selección de estrategia según género
 
-3. **Construcción del Prompt:** Transformación de entradas en prompt estructurado
+### Capa de Generación LLM {#capa-generacion}
 
-4. **Generación:** Envío a DeepSeek V3 con parámetros optimizados  
+- Interfaz API optimizada con DeepSeek V3
 
-5. **Presentación:** Visualización inmediata con funcionalidad de descarga
+- Control de parámetros (temperatura 0.8, max_tokens 1500)
 
+- Manejo robusto de errores y recuperación
 
----
+# 3. Implementación Técnica {#implementacion-tecnica}
 
-# 3. Implementación Técnica {#implementacion}
+## 3.1 Módulo de Procesamiento de Entradas {#modulo-procesamiento}
 
-## 3.1 Validación de Entradas
+### Sistema de Validación Multicapa {#validacion-multicapa}
 
-El sistema implementa validación jerárquica que evalúa presencia de campos requeridos, contenido significativo usando expresiones regulares para detectar entradas sin valor semántico, opciones predefinidas válidas, y estructura narrativa completa con conflicto, obstáculos y resolución.
+La implementación proporciona validación jerárquica:
 
-## 3.2 Ingeniería de Prompts
+**Validación de Presencia:** Verifica campos requeridos (personajes, escenario, género, tono, longitud).
 
-La estrategia de prompt engineering incluye contextualización profesional estableciendo al modelo como "escritor profesional", estructura narrativa explícita (Introducción → Desarrollo → Resolución), integración de elementos narrativos con separadores visuales emoji, y especificación clara de límites de longitud y estilo.
+**Validación de Contenido:** Utiliza expresiones regulares para detectar entradas sin valor semántico.
 
-## 3.3 Generación con LLMs
+**Mensajes Constructivos:** Proporciona ejemplos específicos para entradas problemáticas. El sistema detecta cuando los usuarios ingresan únicamente números en el campo de personajes y responde con mensajes educativos como "El campo 'personajes' no puede ser solo números. Ejemplo: 'Lina, una científica curiosa y valiente.'" Esta aproximación pedagógica ayuda a los usuarios a comprender qué tipos de entradas producen mejores resultados narrativos.
 
-La integración con OpenRouter utiliza la biblioteca OpenAI con URL base personalizada, parámetros optimizados (temperatura 0.8 para equilibrar creatividad con coherencia, max_tokens 1500), y headers personalizados para identificación del proyecto.
+## 3.2 Motor de Generación de Historias {#motor-generacion}
 
-## 3.4 Interfaz de Usuario
+### Interfaz con API LLM {#interfaz-api}
 
-Streamlit proporciona configuración centrada, gestión de estado de sesión para preservar entradas y historias, formulario estructurado con componentes apropiados (text areas, selectboxes, radio buttons), y flujo claro de procesamiento con feedback visual.
+El sistema establece conexión con OpenRouter utilizando configuraciones específicas que optimizan la comunicación con DeepSeek V3. La implementación incluye headers personalizados para identificación del proyecto y manejo de referencias HTTP apropiadas para aplicaciones Streamlit desplegadas.
 
----
+**Parámetros Optimizados:**
 
-# 4. Desafíos y Soluciones {#desafios}
+- **Modelo:** DeepSeek V3 (balance calidad-costo)
 
-## 4.1 Desafíos Técnicos
+- **Temperatura:** 0.8 (equilibrio creatividad-coherencia)
 
-**Integración con APIs Externas:** Solucionado con configuración de timeouts apropiados, headers personalizados, y estructura modular para facilitar cambio de proveedores.
+- **Max_tokens:** 1500 (suficiente para rango especificado)
 
-**Optimización de Parámetros:** Temperatura 0.8 y max_tokens 1500 determinados empíricamente para equilibrar creatividad con coherencia y control de costos.
+### Estrategias por Género {#estrategias-generacion}
 
-**Gestión de Estado:** Utilización del session state de Streamlit para preservar contexto entre interacciones.
+Cada género implementa instrucciones específicas adaptadas a sus convenciones narrativas particulares. Para fantasía, el sistema enfatiza la inclusión de elementos mágicos, criaturas míticas y mundos imaginarios coherentes. En misterio, se instruye al modelo para plantear enigmas con pistas distribuidas estratégicamente y resoluciones lógicas. El género terror recibe directrices para crear tensión progresiva, atmósferas inquietantes y elementos de suspense apropiados. Esta especialización por género permite que cada historia mantenga autenticidad dentro de su categoría narrativa.
 
-## 4.2 Prompt Engineering para Creatividad
+## 3.3 Interfaz de Usuario Streamlit {#interfaz-streamlit}
 
-**Estructuración Efectiva:** Separación clara de elementos narrativos, estructura flexible pero explícita, y contextualización del modelo como "escritor profesional".
+### Diseño de Formulario Interactivo {#formulario-interactivo}
 
-**Determinismo vs. Creatividad:** Enfoque de creatividad guiada que proporciona estructura suficiente manteniendo flexibilidad para expresión creativa.
+La interfaz utiliza componentes Streamlit organizados en columnas para optimizar el espacio visual. Los campos incluyen iconos descriptivos como emoji de personas para personajes, globo terrestre para escenario, y máscaras teatrales para género. Esta aproximación visual facilita la navegación intuitiva y reduce la curva de aprendizaje para nuevos usuarios.
 
-**Diferencias Creativo vs. Factual:** Las tareas creativas requieren contexto emocional y narrativo usando role-playing, mientras las factuales necesitan precisión y restricciones claras.
+**Gestión de Estado:** Preservación de entradas durante errores y re-renders usando `st.session_state`.
 
-## 4.3 Usabilidad
+# 4. Estrategia de Ingeniería de Prompts {#ingenieria-prompts}
 
-**Complejidad de Entrada:** Formulario estructurado con campos etiquetados, iconos emoji para legibilidad, validación en tiempo real, y áreas expandibles.
+## 4.1 Fundamentos de Prompt Engineering Creativo {#fundamentos-prompt}
 
-**Transparencia del Proceso:** Indicadores visuales claros del progreso y estado del sistema durante la generación.
+La ingeniería de prompts para tareas creativas difiere de las factuales, requiriendo:
 
----
+- **Contexto Emocional:** Establecimiento de tono y atmósfera
 
-# 5. Aspectos Éticos y Consideraciones {#etica}
+- **Role-playing:** Contextualización como "escritor profesional especializado"
 
-## 5.1 Sesgos Culturales
+- **Estructuras Flexibles:** Guías que preservan creatividad
 
-**Identificación:** Los LLMs pueden perpetuar sesgos en representación de personajes, escenarios culturales, y resoluciones narrativas basados en sus datos de entrenamiento.
+## 4.2 Arquitectura de Prompts Implementada {#arquitectura-prompts}
 
-**Mitigación:** El sistema permite especificación explícita de elementos culturales por el usuario, no impone restricciones culturales, y preserva la intención original del usuario.
+### Estructura Base {#estructura-base}
 
-## 5.2 Rol del Usuario Humano
+El prompt fundamental establece al modelo como escritor profesional especializado en el género específico solicitado, incorporando el tono emocional deseado. Las consideraciones específicas para cada género proporcionan contexto relevante sin limitar creatividad. La estructura sugerida incluye tres fases narrativas: introducción que presenta escenario y personajes, desarrollo que introduce conflicto y obstáculos, y resolución que cierra satisfactoriamente la historia.
 
-**Colaboración Humano-IA:** El sistema actúa como herramienta de asistencia creativa donde el usuario define elementos narrativos centrales y retiene control editorial completo, mientras el sistema proporciona construcción técnica y coherencia lingüística.
+### Control de Longitud Preciso {#control-longitud}
 
-**Preservación de Autoría:** El usuario mantiene autoría intelectual, el sistema actúa como herramienta de desarrollo, y se preserva control editorial completo.
+Las instrucciones de longitud se calibraron empíricamente para producir historias dentro de rangos específicos. Historias cortas entre 300-400 palabras mantienen narrativas concisas pero completas, mientras que historias medianas de 400-600 palabras permiten desarrollo intermedio con mayor detalle caracterológico. Las historias largas de 600-800 palabras facilitan exploración profunda de temas y desarrollo extenso de tramas complejas.
 
-## 5.3 Uso Responsable
+# 5. Evaluación y Análisis de Resultados {#evaluacion-resultados}
 
-**Limitaciones Reconocidas:** Dependencia de calidad de entrada del usuario y variabilidad inherente del modelo estocástico.
+## 5.1 Criterios de Evaluación Narrativa {#criterios-evaluacion}
 
-**Recomendaciones:** Revisión editorial obligatoria, atribución apropiada del rol de IA, y validación de coherencia cultural cuando sea relevante.
+**Adherencia al Género:** Evaluación de elementos específicos (magia en fantasía, investigación en misterio).
 
----
+**Consistencia de Personajes:** Verificación de mantenimiento de rasgos establecidos.
 
-# 6. Resultados y Evaluación {#resultados}
+**Control de Longitud:** Precisión en rangos de palabras especificados.
 
-## 6.1 Funcionalidad Técnica
+**Calidad Técnica:** Fluidez, coherencia y corrección gramatical.
 
-El sistema demuestra funcionamiento robusto en validación de entradas (detección efectiva de campos incompletos y contenido sin significado), generación de historias (producción consistente de narrativas coherentes con integración efectiva de elementos especificados), e interfaz de usuario (flujo intuitivo y funcionalidad operativa completa).
+## 5.2 Historias de Muestra y Análisis {#historias-muestra}
 
-## 6.2 Calidad Narrativa
+*Nota: Las historias completas generadas por el agente se encuentran disponibles en la carpeta `examples/` del repositorio del proyecto.*
 
-**Coherencia Estructural:** Las historias siguen consistentemente la estructura planteada con integración orgánica de elementos narrativos y consistencia en caracterización.
+### Historia Fantasía Épica: "El Artefacto de Sylvaria" {#historia-fantasia}
 
-**Adherencia a Especificaciones:** Género y tono se reflejan apropiadamente, escenarios se representan fidedignamente, y conflictos se desarrollan coherentemente.
+**Personajes:**
+Aelwyn: elfo guardián, sabio y reservado, protector del bosque; Kael: joven humano impulsivo, aprendiz de hechicero; Nira: dragona antigua, aliada impredecible.
 
-**Creatividad:** Las historias evitan formulaicidad excesiva con variación creativa entre generaciones y expansión imaginativa de elementos.
+**Escenarios:**
+Reino de Sylvaria, una tierra cubierta de bosques encantados y ruinas antiguas; Época medieval mágica, atmósfera mística y ancestral.
 
-## 6.3 Experiencia de Usuario
+**Género:** Fantasía
 
-**Usabilidad:** Formulario comprensible para usuarios no técnicos, mensajes de error claros, y proceso rápido y eficiente.
+**Tono:** Dramático
 
-**Satisfacción:** Generación completa en minutos, funcionalidad de descarga efectiva, y capacidad de iteración para refinamiento.
+**Conflicto Central:** Un artefacto oscuro ha sido activado y amenaza con corromper el equilibrio entre magia y naturaleza.
 
-**Limitaciones:** Dependencia de especificidad en entradas y variabilidad ocasional que puede divergir de expectativas específicas.
+**Obstáculos principales:**
+La desconfianza entre razas; Criaturas corrompidas que custodian el artefacto; El tiempo: el artefacto se fortalece con cada luna llena.
 
----
+**Resolución esperada:**
+Aelwyn y Kael deben unir fuerzas con Nira para destruir el artefacto en un templo oculto, a través de un ritual que pondrá en riesgo sus vidas.
 
-# 7. Reflexiones y Lecciones Aprendidas {#reflexiones}
+**Longitud:** Larga (600-800 palabras)
 
-## 7.1 Desarrollo de IA Creativa
+**Incluir diálogos entre personas:** Sí
 
-**Prompt Engineering:** El diseño para tareas creativas requiere equilibrio entre structure y freedom. La contextualización como "escritor profesional" resulta más efectiva que instrucciones técnicas directas.
+**Análisis:**
 
-**Arquitectura Modular:** La separación clara entre componentes facilitó significativamente desarrollo iterativo y depuración del sistema.
+La historia cumple exitosamente con todos los parámetros establecidos, creando una narrativa épica que equilibra elementos de fantasía tradicional con desarrollo de personajes profundo. El agente logra manejar la desconfianza entre razas como obstáculo central, introduciendo a Nira de manera orgánica y desarrollando diálogos naturales que revelan personalidades distintas pero complementarias. La estructura narrativa sigue el arco clásico de fantasía épica con llamado a la aventura, reclutamiento de aliados, enfrentamiento del mal y resolución heroica, mientras el ritual de destrucción del Orbe proporciona el elemento de sacrificio prometido, culminando en una lección sobre la unidad que trasciende las diferencias raciales y generacionales.
 
-## 7.2 Colaboración Humano-IA
+### Historia Misterio Policial: "Los Códigos de Brumablanca" {#historia-misterio}
 
-**Usuario como Co-creador:** Los mejores resultados se obtienen cuando el usuario aporta ideas específicas y contexto cultural detallado, permitiendo que el sistema se enfoque en construcción técnica.
+**Personajes:**
+Inspectora Laura Márquez: metódica, cínica, obsesionada con resolver el caso; Andrés: joven periodista curioso, nuevo en el pueblo; Elías: dueño de una librería antigua, enigmático.
 
-**Control Editorial:** Mantener al usuario en control editorial completo mejora la calidad percibida del output y es éticamente importante.
+**Escenarios:**
+Pueblo costero de Brumablanca, lleno de niebla y supersticiones; Presente, atmósfera tensa y sombría.
 
-## 7.3 Limitaciones de LLMs
+**Género:** Misterio
 
-**Determinismo vs. Creatividad:** Los LLMs generan contenido aparentemente creativo basado en patrones de entrenamiento. La "creatividad" emerge de recombinación novel de elementos aprendidos.
+**Tono:** Oscuro
 
-**Sesgos Culturales:** Los modelos muestran sesgo hacia narrativas familiares en datos de entrenamiento. La especificación explícita por el usuario ayuda a contrarrestar estos sesgos.
+**Conflicto Central:** Aparecen mensajes encriptados en libros antiguos antes de cada desaparición misteriosa.
 
-## 7.4 Decisiones de Diseño
+**Obstáculos principales:**
+Resistencia de los habitantes del pueblo; El caso fue cerrado hace años; Andrés es visto como forastero y causa sospechas.
 
-**Decisiones Técnicas Clave:** DeepSeek V3 seleccionado por balance calidad-costo, temperatura 0.8 optimizada empíricamente, estructura de prompt con emojis para parsing visual, validación multicapa para prevenir errores costosos.
+**Resolución esperada:**
+Laura y Andrés descubren que el asesino sigue activo, usando los libros como forma de confesar sin ser atrapado.
 
-**Decisiones de Arquitectura:** Modularidad estricta para facilitar testing y extensión, Streamlit para balance rapidez-funcionalidad, session state management para preservar contexto.
+**Longitud:** Mediana (400-600 palabras)
 
----
+**Incluir diálogos entre personas:** Sí
 
-# 8. Conclusiones y Trabajo Futuro {#conclusiones}
+**Análisis:**
 
-## 8.1 Logros
+La historia demuestra un manejo sofisticado del género policial que crea una atmósfera gótica efectiva en el pueblo costero de Brumablanca. El agente desarrolla exitosamente la investigación de mensajes encriptados en libros, introduciendo a Elías como sospechoso inicial para luego revelar una conspiración más profunda donde el verdadero asesino utiliza el sistema de falsas identidades como cobertura. Los diálogos entre Laura y Andrés construyen tensión progresiva mientras exploran la resistencia del pueblo, y la revelación final en el faro mantiene el misterio abierto con la promesa de "El Nieblón", equilibrando resolución parcial con suspense continuo típico del género noir contemporáneo. Adicionalmente, el agente demostró capacidad para crear una continuación coherente que mantiene la consistencia de personajes y desarrolla orgánicamente los elementos establecidos, escalando el horror sobrenatural mientras preserva la lógica interna de la narrativa original.
 
-**Sistema Funcional Completo:** Agente operacional con integración efectiva entre validación, prompt engineering, comunicación con APIs, e interfaz intuitiva.
+### Historia Romance Contemporáneo: "Recetas del Corazón" {#historia-romance}
 
-**Arquitectura Escalable:** Implementación modular que facilita mantenimiento, testing, y extensión futura con componentes independientes.
+**Personajes:**
+Camila: chef perfeccionista, dueña de un pequeño restaurante; Diego: músico bohemio, nuevo vecino que siempre está tocando a todo volumen.
 
-**Experiencia Optimizada:** Interfaz que permite a usuarios no técnicos generar historias personalizadas eficientemente con feedback claro.
+**Escenarios:**
+Ciudad moderna, barrio artístico lleno de cafés y murales; Presente, atmósfera cálida y caótica.
 
-## 8.2 Limitaciones
+**Género:** Romance
 
-**Dependencias Externas:** Dependencia completa de servicios externos introduce puntos de falla potenciales y dependency on pricing structures.
+**Tono:** Humorístico
 
-**Escalabilidad:** Costos de API pueden volverse prohibitivos para uso extensivo sin optimizaciones adicionales, y arquitectura actual no optimizada para múltiples usuarios simultáneos.
+**Conflicto Central:** Camila y Diego chocan constantemente por sus estilos de vida opuestos, pero una competencia culinaria los obliga a colaborar.
 
-## 8.3 Trabajo Futuro
+**Obstáculos principales:**
+Orgullo de ambos; Malentendidos constantes; Interferencias de amigos y vecinos entrometidos.
 
-**Mejoras Técnicas:** Error handling robusto con retry logic, sistema de cache para reducir costos, soporte múltiples proveedores LLM con failover automático.
+**Resolución esperada:**
+A través del trabajo conjunto, aprenden a valorar sus diferencias y terminan creando un plato ganador… y algo más.
 
-**Funcionalidades Avanzadas:** Historia interactiva por capítulos, estilos de autor personalizados, collaborative writing, rich media integration.
+**Longitud:** Corta (300-400 palabras)
 
-**Investigación:** Evaluación automatizada de calidad narrativa, bias detection y mitigation, user studies formales, integración de modelos locales.
+**Incluir diálogos entre personas:** Sí
 
-## 8.4 Reflexión Final
+**Análisis:**
 
-Este proyecto demuestra el potencial de LLMs como herramientas de asistencia creativa cuando se implementan con focus en colaboración humano-IA. La clave del éxito reside en reconocer fortalezas complementarias: humanos aportan creatividad, contexto y juicio, mientras LLMs proporcionan ejecución técnica, fluidez lingüística y capacidad de iteración rápida.
+La historia ejecuta perfectamente el romance contemporáneo, capturando la esencia humorística y caprichosa solicitada através de la dinámica chef-músico que refleja personalidades opuestas complementarias. El agente maneja hábilmente los obstáculos del orgullo y malentendidos mediante diálogos chispeantes que revelan la tensión romántica subyacente, mientras la competencia culinaria "Fusión Creativa" proporciona el catalizador perfecto para su colaboración forzada. La resolución integra orgánicamente elementos culinarios y musicales en el plato "Canción de Pasta", culminando en un desenlace romántico sutil pero satisfactorio que transforma el conflicto inicial en armonía tanto personal como artística, demostrando cómo las diferencias pueden enriquecerse mutuamente en lugar de separar.
 
-El futuro de sistemas de IA creativa reside en este enfoque colaborativo donde la tecnología amplifica rather than replaces creatividad humana, manteniendo autoría humana while leveraging capacidades de IA para superar barreras técnicas en el proceso creativo.
+### Historia Ciencia Ficción: "Protocolo Argonauta" {#historia-ciencia-ficcion}
 
----
+**Personajes:**
+Dr. Liu: astrobióloga pragmática, líder de la misión; Myra: inteligencia artificial con tendencias filosóficas; Enrique: ingeniero con ansiedad crónica, segundo al mando.
 
-# 9. Bibliografía {#bibliografia}
+**Escenarios:**
+Estación orbital "Argonauta", cerca del planeta Gliese-581d; Futuro lejano, atmósfera aislada y tecnológica.
+
+**Género:** Ciencia Ficción
+
+**Tono:** Satírico
+
+**Conflicto Central:** Aparece un mensaje codificado proveniente del planeta, pero la IA Myra comienza a actuar de forma extraña.
+
+**Obstáculos principales:**
+Desconfianza en la IA; Riesgo biológico si bajan al planeta; Fallas en el sistema de comunicación.
+
+**Resolución esperada:**
+La doctora Liu arriesga todo para activar el protocolo de contacto y descubre que Myra no es hostil, sino un puente entre humanos y la vida alienígena.
+
+**Longitud:** Larga (600-800 palabras)
+
+**Incluir diálogos entre personas:** Sí
+
+**Análisis:**
+
+La historia de ciencia ficción logra crear una narrativa reflexiva y tensa que explora magistralmente temas de confianza humano-IA y comunicación interestelar. El agente desarrolla efectivamente la evolución de Myra desde herramienta técnica hasta puente consciente, manejando el conflicto entre protocolo científico y riesgo existencial a través de diálogos auténticos que revelan las personalidades de Liu (pragmática) y Enrique (ansioso). La resolución trasciende expectativas al presentar una forma de vida no basada en materia que se comunica através de emociones puras, convirtiendo el aparente malfuncionamiento de la IA en un descubrimiento revolucionario que redefine los conceptos de consciencia y comunicación interplanetaria, todo mientras mantiene tensión narrativa hasta el momento final de revelación.
+
+### Historia Terror Gótico: "El Diario del Inquisidor" {#historia-terror}
+
+**Personajes:**
+Clara: joven historiadora apasionada por lo oculto; Sr. Rivas: anciano con delirios proféticos, vive en el pueblo desde hace 90 años.
+
+**Escenarios:**
+Mansión abandonada en los Andes colombianos, envuelta en niebla; Años 1950, atmósfera lúgubre y sobrenatural.
+
+**Género:** Terror
+
+**Tono:** Dramático
+
+**Conflicto Central:** Clara debe pasar una noche en la mansión para estudiar los diarios de un inquisidor, pero descubre que hay algo más que papel entre esas paredes.
+
+**Obstáculos principales:**
+Presencias invisibles; El diario cambia su contenido cada noche; Clara empieza a tener visiones que no sabe si son suyas.
+
+**Resolución esperada:**
+Clara logra escapar al romper el ciclo de maldición al escribir una última entrada en el diario, sellando el espíritu.
+
+**Longitud:** Mediana (400-600 palabras)
+
+**Incluir diálogos entre personas:** No
+
+**Análisis:**
+
+La historia de terror gótico ejecuta brillantemente la atmósfera tenebrosa y dramática solicitada, creando una narrativa sin diálogos que intensifica la sensación de aislamiento sobrenatural. El agente maneja efectivamente la ambientación andina de los años 1950, integrando elementos culturales colombianos con el horror gótico clásico através del diario que cambia contenido como elemento sobrenatural activo. La progresión del terror es gradual y psicológica, desde la desconfianza inicial hasta la revelación de que Clara está siendo observada por entidades atrapadas, mientras la resolución requiere participación activa de la protagonista al escribir la línea liberadora, demostrando cómo el agente puede crear narrativas de horror efectivas que combinan elementos sobrenaturales tradicionales con escenarios geográficos específicos.
+
+### Historia Caso Extremo: "La Paradoja del Tiempo Culinario" {#historia-caso-extremo}
+
+**Personajes:**
+Chef Marcus: cocinero molecular obsesivo del siglo XXI; Abuela Remedios: espíritu de cocinera tradicional del siglo XVIII; Robot-Asistente XK-7: inteligencia artificial culinaria del año 3025.
+
+**Escenarios:**
+Restaurante interdimensional flotante; Época: simultáneamente pasado, presente y futuro; atmósfera caótica y surrealista.
+
+**Género:** Aventura
+
+**Tono:** Humorístico
+
+**Conflicto Central:** Un chef debe preparar la cena perfecta usando técnicas de tres épocas diferentes mientras el tiempo se fragmenta y los ingredientes cobran vida propia, todo esto para una cita romántica con un crítico gastronómico que resulta ser un vampiro vegetariano.
+
+**Obstáculos principales:**
+Los utensilios de cocina viajan en el tiempo; Los ingredientes del pasado y futuro son incompatibles químicamente; El cliente vampiro tiene alergia al ajo pero ama la comida italiana; El restaurante está siendo investigado por la policía temporal por violaciones culinarias interdimensionales.
+
+**Resolución esperada:**
+Marcus debe fusionar las técnicas culinarias de las tres épocas creando un nuevo estilo de cocina "temporal" que satisfaga al vampiro, detenga la investigación policial y mantenga la estabilidad del espacio-tiempo, todo mientras descubre que el amor verdadero trasciende las dimensiones temporales.
+
+**Longitud:** Larga (600-800 palabras)
+
+**Incluir diálogos entre personas:** Sí
+
+**Análisis:**
+
+La historia caso extremo logra algo mejor de lo esperado al generar una narrativa que, aunque completamente absurda, mantiene un hilo de coherencia interna sorprendente. El agente consigue capturar todos los elementos contradictorios del prompt - vampiro vegetariano alérgico al ajo, cocina temporal interdimensional, policía temporal - y de alguna manera los entreteje en una historia que por lo menos tiene sentido dentro de su propia lógica disparatada. La resolución del "recuerdo del ajo" es especialmente ingeniosa para abordar la contradicción aparentemente imposible del personaje vampiro, mientras que la fusión de elementos temporales resulta muy loca pero coherente con el escenario establecido. Aunque la premisa es completamente descabellada, el agente logra mantener el tono humorístico y crear una narrativa que funciona como entretenimiento, demostrando capacidad para generar creatividad coherente incluso ante especificaciones deliberadamente imposibles.
+
+# 6. Conclusiones y Perspectivas {#conclusiones}
+
+## 6.1 Cumplimiento de Objetivos {#cumplimiento-objetivos}
+
+**Logros Técnicos:**
+
+- Arquitectura modular escalable facilitando mantenimiento
+
+- Prompts especializados por género con control de longitud preciso
+
+- Sistema de validación robusto con retroalimentación constructiva
+
+- Integración API efectiva con manejo de errores comprehensivo
+
+**Contribuciones al Campo:**
+
+- Diferenciación clara entre prompt engineering creativo vs. factual
+
+- Modelo de colaboración humano-IA preservando autoría humana
+
+- Estrategias de mitigación de sesgos culturales
+
+## 6.2 Limitaciones y Trabajo Futuro {#limitaciones-futuro}
+
+**Limitaciones Actuales:**
+
+- Dependencia completa de servicios API externos
+
+- Optimización para uso individual únicamente
+
+- Evaluación de calidad dependiente de juicio humano subjetivo
+
+- Costos operacionales potencialmente prohibitivos
+
+**Direcciones Futuras:**
+
+- **Mejoras Técnicas:** Sistema de cache, multi-proveedor LLM, retry logic
+
+- **Funcionalidades Avanzadas:** Historia interactiva por capítulos, soporte multi-idioma
+
+- **Investigación:** Métricas objetivas para calidad narrativa, detección automatizada de sesgos
+
+**Visión a Largo Plazo:**
+El futuro de IA creativa reside en colaboración que amplifica rather than reemplaza creatividad humana. Herramientas como esta pueden democratizar escritura creativa manteniendo valor de expertise profesional y control editorial humano.
+
+# 7. Bibliografía {#bibliografia}
 
 <h2>Referencias</h2>
-
 <ul>
-  <li>DeepSeek AI. (2024). <i>DeepSeek-V3: Advanced Large Language Model</i> [Large language model]. <a href="https://www.deepseek.com/" target="_blank">https://www.deepseek.com/</a></li>
+  <li>DeepSeek AI. (2024). <i>DeepSeek-V3: Advanced Large Language Model</i>. <a href="https://www.deepseek.com/" target="_blank">https://www.deepseek.com/</a></li>
   <li>OpenRouter AI. (2024). <i>OpenRouter API Documentation</i>. <a href="https://openrouter.ai/docs" target="_blank">https://openrouter.ai/docs</a></li>
   <li>Streamlit Inc. (2024). <i>Streamlit Documentation</i>. <a href="https://docs.streamlit.io/" target="_blank">https://docs.streamlit.io/</a></li>
 </ul>
 
-<h2 id="10-anexos">10 Anexos</h2>
-
+<h2>Anexos</h2>
 <h3>Información del Proyecto</h3>
 <ul>
   <li><b>Repositorio principal:</b> <a href="https://github.com/vasquez-esteban/RNA_G4_T4" target="_blank">GitHub - RNA_G4_T4</a></li>
