@@ -90,7 +90,7 @@ Este proyecto desarrolla un agente creativo basado en LLMs para generación cola
 
 **Objetivos Cumplidos:** Prompts especializados por género, validación robusta, gestión de estado persistente, y evaluación de calidad narrativa.
 
-**Contribuciones:** Estrategias diferenciadas de prompt engineering creativo, análisis de colaboración humano-IA, y sistemas de filtrado ético.
+**Contribuciones:** Estrategias diferenciadas de prompt engineering creativo, análisis de colaboración humano-IA, y sistemas de filtrado ético con implementación de listas de control de contenido inapropiado.
 
 # 1. Introducción y Objetivos {#introduccion}
 
@@ -180,6 +180,8 @@ La implementación proporciona validación jerárquica:
 
 **Mensajes Constructivos:** Proporciona ejemplos específicos para entradas problemáticas. El sistema detecta cuando los usuarios ingresan únicamente números en el campo de personajes y responde con mensajes educativos como "El campo 'personajes' no puede ser solo números. Ejemplo: 'Lina, una científica curiosa y valiente.'" Esta aproximación pedagógica ayuda a los usuarios a comprender qué tipos de entradas producen mejores resultados narrativos.
 
+**Filtrado de Contenido:** Implementa verificación de contenido inapropiado utilizando listas estandarizadas de términos problemáticos (LDNOOBW, 2024) para garantizar generación de contenido apropiado y familiar.
+
 ## 3.2 Motor de Generación de Historias {#motor-generacion}
 
 ### Interfaz con API LLM {#interfaz-api}
@@ -190,7 +192,7 @@ El sistema establece conexión con OpenRouter utilizando configuraciones especí
 
 - **Modelo:** DeepSeek V3 (balance calidad-costo)
 
-- **Temperatura:** 0.8 (equilibrio creatividad-coherencia)
+- **Temperatura:** 0.8 (equilibrio creatividad-coherencia, siguiendo las recomendaciones de Boonstra, 2025, para salidas imaginativas pero coherentes)
 
 - **Max_tokens:** 1500 (suficiente para rango especificado)
 
@@ -214,7 +216,7 @@ La ingeniería de prompts para tareas creativas difiere de las factuales, requir
 
 - **Contexto Emocional:** Establecimiento de tono y atmósfera
 
-- **Role-playing:** Contextualización como "escritor profesional especializado"
+- **Role-playing:** Contextualización como "escritor profesional especializado" (técnica de role prompting según Boonstra, 2025)
 
 - **Estructuras Flexibles:** Guías que preservan creatividad
 
@@ -222,7 +224,7 @@ La ingeniería de prompts para tareas creativas difiere de las factuales, requir
 
 ### Estructura Base {#estructura-base}
 
-El prompt fundamental establece al modelo como escritor profesional especializado en el género específico solicitado, incorporando el tono emocional deseado. Las consideraciones específicas para cada género proporcionan contexto relevante sin limitar creatividad. La estructura sugerida incluye tres fases narrativas: introducción que presenta escenario y personajes, desarrollo que introduce conflicto y obstáculos, y resolución que cierra satisfactoriamente la historia.
+El prompt fundamental establece al modelo como escritor profesional especializado en el género específico solicitado, incorporando el tono emocional deseado. Las consideraciones específicas para cada género proporcionan contexto relevante sin limitar creatividad, implementando técnicas de contextual prompting (Boonstra, 2025). La estructura sugerida incluye tres fases narrativas: introducción que presenta escenario y personajes, desarrollo que introduce conflicto y obstáculos, y resolución que cierra satisfactoriamente la historia.
 
 ### Control de Longitud Preciso {#control-longitud}
 
@@ -298,7 +300,7 @@ Laura y Andrés descubren que el asesino sigue activo, usando los libros como fo
 
 **Análisis:**
 
-La historia demuestra un manejo sofisticado del género policial que crea una atmósfera gótica efectiva en el pueblo costero de Brumablanca. El agente desarrolla exitosamente la investigación de mensajes encriptados en libros, introduciendo a Elías como sospechoso inicial para luego revelar una conspiración más profunda donde el verdadero asesino utiliza el sistema de falsas identidades como cobertura. Los diálogos entre Laura y Andrés construyen tensión progresiva mientras exploran la resistencia del pueblo, y la revelación final en el faro mantiene el misterio abierto con la promesa de "El Nieblón", equilibrando resolución parcial con suspense continuo típico del género noir contemporáneo. Adicionalmente, el agente demostró capacidad para crear una continuación coherente que mantiene la consistencia de personajes y desarrolla orgánicamente los elementos establecidos, escalando el horror sobrenatural mientras preserva la lógica interna de la narrativa original.
+La historia demuestra un manejo sofisticado del género policial que crea una atmósfera gótica efectiva en el pueblo costero de Brumablanca. El agente desarrolla exitosamente la investigación de mensajes encriptados en libros, introduciendo a Elías como sospechoso inicial para luego revelar una conspiración más profunda donde el verdadero asesino utiliza el sistema de falsas identidades como cobertura. Los diálogos entre Laura y Andrés construyen tensión progresiva mientras exploran la resistencia del pueblo, y la revelación final en el faro mantiene el misterio abierto con la promesa de "El Nieblón", equilibrando resolución parcial con suspense continuo típico del género noir contemporáneo. Adicionalmente, el agente demostró capacidad para crear una continuación coherente que mantiene la consistencia de personajes y desarrolla orgánicamente los elementos establecidos, escalando el horror sobrenatural mientras preserva la lógica interna de la narrativa original. Esta capacidad de extensión narrativa refleja la aplicación de técnicas de Chain-of-Thought para mantener coherencia en desarrollos complejos (Boonstra, 2025).
 
 ### Historia Romance Contemporáneo: "Recetas del Corazón" {#historia-romance}
 
@@ -434,6 +436,8 @@ La historia caso extremo logra algo mejor de lo esperado al generar una narrativ
 
 - Estrategias de mitigación de sesgos culturales
 
+- Implementación de filtros de contenido apropiado para aplicaciones familiares
+
 ## 6.2 Limitaciones y Trabajo Futuro {#limitaciones-futuro}
 
 **Limitaciones Actuales:**
@@ -461,7 +465,9 @@ El futuro de IA creativa reside en colaboración que amplifica rather than reemp
 
 <h2>Referencias</h2>
 <ul>
+  <li>Boonstra, L. (2025, febrero). <i>Prompt Engineering</i>. Google Cloud.</li>
   <li>DeepSeek AI. (2024). <i>DeepSeek-V3: Advanced Large Language Model</i>. <a href="https://www.deepseek.com/" target="_blank">https://www.deepseek.com/</a></li>
+  <li>LDNOOBW. (2024). <i>List of Dirty, Naughty, Obscene, and Otherwise Bad Words</i>. GitHub. <a href="https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words" target="_blank">https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words</a></li>
   <li>OpenRouter AI. (2024). <i>OpenRouter API Documentation</i>. <a href="https://openrouter.ai/docs" target="_blank">https://openrouter.ai/docs</a></li>
   <li>Streamlit Inc. (2024). <i>Streamlit Documentation</i>. <a href="https://docs.streamlit.io/" target="_blank">https://docs.streamlit.io/</a></li>
 </ul>
