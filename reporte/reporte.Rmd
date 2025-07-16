@@ -481,5 +481,5 @@ El futuro de IA creativa reside en colaboración que amplifica rather than reemp
 
 <h3>Recursos Complementarios</h3>
 <ul>
-  <li><b>Video presentación:</b> <a href="https://youtube.com" target="_blank">Enlace pendiente</a></li>
+  <li><b>Video demo (Acceder con correo UNAL):</b> <a href="https://drive.google.com/file/d/1O8eBV7E-Si8bQlZb3boHebBrG73caPP7/view?usp=sharing" target="_blank">Ver aquí</a></li>
 </ul>
