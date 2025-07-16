@@ -153,4 +153,5 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 ## 🔗 Referencias
 
 - Reporte Técnico: [Rpubs](https://rpubs.com/evasp/rna-g4-trabajo4)
+- Video: [Ver aquí con correo UNAL](https://drive.google.com/file/d/1O8eBV7E-Si8bQlZb3boHebBrG73caPP7/view?usp=sharing)
 - Lista de malas palabras: <https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words>
